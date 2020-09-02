@@ -12,15 +12,15 @@
     </div>
     <div class="col-md-4">
       <form enctype="multipart/form-data" action="/users/import" accept-charset="UTF-8" method="post">
-      <div class="search_item">
-        <input type="button" name="commit" value="ファイル選択" class="csv_input_btn" onclick="$('#file_input').click();" data-disable-with="ファイル選択">
-        <input type="text" name="filename" id="filename" value="">
-        <input type="file" name="csv_file" id="file_input" style="display: none;" onchange="file_selected($(this));">
-      </div>
-      <div class="col-md-4" style="margin-left:-10pt;">
-        <input type="submit" name="commit" value="CSVインポート" class="btn btn-primary" data-disable-with="CSVインポート">
-      </div>
-    </form>
+        <div class="search_item">
+          <input type="button" name="commit" value="ファイル選択" class="csv_input_btn" onclick="$('#file_input').click();" data-disable-with="ファイル選択">
+          <input type="text" name="filename" id="filename" value="">
+          <input type="file" name="csv_file" id="file_input" style="display: none;" onchange="file_selected($(this));">
+        </div>
+        <div class="csv-btn ">
+          <input type="submit" name="commit" value="CSVインポート" class="btn btn-primary " data-disable-with="CSVインポート">
+        </div>
+      </form>
     </div>
     
     <script type="text/javascript">
