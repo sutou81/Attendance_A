@@ -34,6 +34,13 @@
       <%= will_paginate @user %>
       <table class="table table-condensed " id="table-users">
         <tbody>
+          <tr class="blank_height">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
           <% @user.each do |user| %>
             <tr>
               <td><%= link_to user.name, user_path(user) %></td>
