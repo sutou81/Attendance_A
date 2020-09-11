@@ -1,7 +1,10 @@
 <%= provide(:title, "All Users") %>
+<% provide(:class_text, 'user--edit') %>
+<% provide(:button_text, '編集する') %>
 <div class="container">
+
   <h1>全てのユーザー</h1>
-  <div class="row">
+  <div class="row to-the-left">
     <div class="form-inline">
       <div class="col-md-4 col-md-offset-8",style="display:inline;">
         <%= form_with(url:users_path, method: :get, local:true) do |f| %>
@@ -13,49 +16,46 @@
     <div class="col-md-4">
       <form enctype="multipart/form-data" action="/users/import" accept-charset="UTF-8" method="post">
         <div class="search_item">
-          <input type="button" name="commit" value="ファイル選択" class="csv_input_btn" onclick="$('#file_input').click();" data-disable-with="ファイル選択">
-          <input type="text" name="filename" id="filename" value="">
-          <input type="file" name="csv_file" id="file_input" style="display: none;" onchange="file_selected($(this));">
+          <input type="file" name="file" id="file" class="form-control">
         </div>
         <div class="csv-btn ">
-          <input type="submit" name="commit" value="CSVインポート" class="btn btn-primary " data-disable-with="CSVインポート">
+          <input type="submit" name="commit" value="CSVインポート" class="btn btn-primary btn-block" data-disable-with="CSVインポート">
         </div>
       </form>
     </div>
     
-    <script type="text/javascript">
-      function file_selected(file_field) {
-        var filename = $(file_field)[0].files[0].name;
-      $('#filename').val(filename);  
-      }
-    </script>
+    
 
-    <div class="col-md-10 col-md-offset-1">
+    <div class="col-md-10 new-table">
       <%= will_paginate @user %>
-      <table class="table table-condensed " id="table-users">
+      <table class="table table-condensed table-borderless " id="table-users" width="100%">
         <tbody>
           <tr class="blank_height">
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td width="100%"></td>
+            
           </tr>
           <% @user.each do |user| %>
-            <tr>
-              <td><%= link_to user.name, user_path(user) %></td>
-              <td class="center"><%= user.department.present? ? user.department : "未所属" %></td>
-              <td class="center"><%= format_basic_info(user.basic_time) %></td>
-              <td class="center"><%= format_basic_info(user.work_time) %></td>
-              <td class="center">
-                <% unless user.admin? %>
-                  <%= link_to "基本情報編集", edit_basic_info_user_path(user), remote: true, class: "btn btn-success" %>
-                  <%= link_to "削除", user, method: :delete,
-                    data: { confirm: "削除してよろしいですか？" },
-                    class: "btn btn-danger" %>
-                <% end %>
-              </td>
-            </tr>
+            <% if !user.admin %>
+              <tr class="new-table__item">
+                <td width="100%"><div class="td-content1"><%= link_to user.name, user_path(user) %></div>
+                  <div class="td-content2">l&nbsp<%= link_to "削除", user, method: :delete,
+                        data: { confirm: "削除してよろしいですか？" },
+                        class: "btn btn-primary" %></div>
+                  <div class="td-content3">  
+                    <!-- ↓の説明：data-toggle = "collapse"→開閉ボタンに必要 data-target→開閉ボタンに必要、開閉するコンテンツと紐付ける 🌸🔴コンテンツの方にはclassにcollapseと付ける-->
+                    <button  class="btn btn-primary btn-lg btn-click btn-outline-warning " data-toggle = "collapse" data-target = "#accordion<%= user.id %>" aria-expanded="true" aria-controls = "accordion" autocomplete = "off">編集</button>
+                    
+                  </div>
+                  <div class="collapse  td-content3 td-content3-bgcolor" id="accordion<%= user.id %>">
+                    <div class="collapse in" >
+                        <div class="card card-body">
+                          <%= render 'new_form',{ user: user} %>
+                        </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
           <% end %>
         </tbody>  
       </table>

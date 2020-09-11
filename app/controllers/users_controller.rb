@@ -10,7 +10,7 @@ class UsersController < ApplicationController
   def new
     @user = User.new
   end
-  
+  # 編集前 @user = User.paginate(page: params[:page]).search(params[:search])
   def index
     @user = User.paginate(page: params[:page]).search(params[:search])
   end

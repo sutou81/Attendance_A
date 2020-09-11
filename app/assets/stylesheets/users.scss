@@ -49,6 +49,10 @@
 /* ユーザー一覧ページ */
 
 #table-users {
+  tr {
+    border-collapse: collapse;
+    border: 0px none !important;
+  }
   td {
     vertical-align: middle;
   }  
@@ -85,11 +89,83 @@
 .margin-bottom{
   margin-bottom: 5px;
 }
+/* csv機能関係 */
 
 .csv-btn{
-  margin-top: 2px;
+  margin-top: 10px;
 }
 
+
+/* 勤怠Aのユーザー一覧テーブルの枠 */
 .blank_height{
   height: 20px;
 }
+
+.new-table{
+  margin-left: 15px;
+}
+
+.new-table__item{
+  border-collapse: collapse;
+  border: 0px none !important;
+}
+
+/* indexページ全体的に左寄りにする */@at-root
+.to-the-left {
+  margin-left: -10px;
+}
+
+table, tr, th, td {
+  border: -10px none;
+}
+/* ユーザー一覧の名前の装飾 */
+.td-content1 {
+  font-size: 15px;
+}
+
+/* ユーザー一覧の編集ボタンの装飾 */
+.td-content2 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+/* ユーザー一覧の削除ボタンの装飾 */
+.td-content3 {
+  border-color:#ddd;
+  border-style: solid ; 
+  border-width: 1px;
+  background:#F2F2F2;
+  border-radius: 2px;
+  padding:  10px 20px 10px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+
+
+/*ユーザー一覧の編集ボタン装飾 */
+.btn-click:active{
+  border: 2.5px solid #DDEEFF !important;
+  box-shadow: 0 0 0 1px black;
+  
+}
+
+
+
+/* アコーディオンの大枠 */
+.td-content3-bgcolor {
+  background: #f8f8ff;
+  margin-top: -20px;
+}
+
+.collapse-content {
+  background: #f8f8ff;
+}
+.collapse {
+  display:none;
+}
+.collapse.in {
+  display: block;
+}
+
+
