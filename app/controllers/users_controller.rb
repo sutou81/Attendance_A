@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  protect_from_forgery except: :import 
   require 'rounding'
   before_action :set_user, only: [:show, :edit, :update, :destroy, :edit_basic_info, :update_basic_info]
   before_action :logged_in_user, only: [:edit, :update, :destroy, :index, :edit_basic_info, :update_basic_info]
@@ -25,6 +26,7 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     if @user.save
       log_in(@user) # 保存成功後、ログインします。
+      
       flash[:success] = "新規作成しました。"
       redirect_to user_url(@user) # ←はredirect_to user_url(@user)と同等→ @userの意味するところ：user.id
     else

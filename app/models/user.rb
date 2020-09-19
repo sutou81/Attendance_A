@@ -92,19 +92,24 @@ class User < ApplicationRecord
   # foreachの説明→eachを使うと対象データが全てメモリに展開されてしまう。不都合：大量にメモリを消費してしまう
   # 上記を回避するため→forcachを使って'1行ずつ'展開してメモリを節約する
   def self.import(file)
-    CSV.foreach(file.path, headers: true) do |row|
+    CSV.foreach(file.path, headers: true, encoding: 'Shift_JIS:UTF-8') do |row|
       # IDが見つかれば、レコードを呼び出し、見つかれなければ、新しく作成
       user = find_by(id: row[:id]) || new
       # CSVからデータを取得し、設定する
       # rowに格納されたデータをto_hashでハッシュ化(キーとそれに対応する値の形にする→apple100円：apple => 100と表記するもの)
       # 上記の続き:Hashオブジェクトでsliceメソッドを利用することで、引数に渡したキーに該当するペアだけのハッシュを取得できます。
-      # 上記の続き:hash= {"apple" => 100}というhashにp(hash.slice("apple"))をすると結果{"apple" => 100}が取り出せる
+      # 上記の続き:hash= {"apple" => 100}というhashにp(hash.slice("apple"))をすると結果{"apple" => 100}が取り出せる。
       # ※ハッシュ化→配列をハッシュとして定義する方法ex aには配列がはいってる→ a = {} でハッシュ化できる
       # ※2参考サイト https://qiita.com/iron-breaker/items/32710004f0bb2e2babb6
       # ※★ハッシュの表記:hash= {"apple" => 100}の他にシンボル表記できる{:apple => 100}→簡略化{apple: 100}
       # ※★参考サイトhttps://qiita.com/iron-breaker/items/32710004f0bb2e2babb6
       user.attributes = row.to_hash.slice(*updatable_attributes)
-      user.save
+      if @user.valid?
+        @user.save
+      else
+        flash[:danger] = "#{@user.name}の更新は失敗しました。<br>" + @user.errors.full_messages.join("<br>")
+        render :index
+      end
      
     end
   end
