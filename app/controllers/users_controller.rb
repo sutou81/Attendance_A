@@ -72,15 +72,21 @@ class UsersController < ApplicationController
         if @user.update_attributes(basic_info_params)
           flash[:success] = "#{@user.name}の基本情報を更新しました"
         else
-        flash[:danger] = "#{@user.name}の更新は失敗しました。<br>" + @user.errors.full_messages.join("<br>")
+        flash[:danger] = "#{@user.name}の更新は失敗しました。<br>"
+
         end
       end
     redirect_to users_url
   end
 
   def import
-    User.import(params[:file])
-    redirect_to users_url
+    
+   cnt, a = User.import(params[:file])
+   
+   
+   flash[:danger] = "<br>#{cnt[0]}<br>""<br>#{cnt[1]}<br>""<br>#{cnt[2]}<br>"
+   
+   redirect_to users_url
   end
   
   

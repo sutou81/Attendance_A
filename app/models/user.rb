@@ -19,6 +19,7 @@ class User < ApplicationRecord
   validates :department, length: {in: 2..30}, allow_blank: true
   validates :basic_time, presence: true
   validates :work_time, presence: true
+  validates :employee_number, uniqueness: true
   # allow_nil:これでは新規作成の時もパスワードのバリデーションがスルーされてしまうのでは？
   # has_secure_passwordがオブジェクト生成時に存在性を検証するようになっています。
   has_secure_password
@@ -92,9 +93,12 @@ class User < ApplicationRecord
   # foreachの説明→eachを使うと対象データが全てメモリに展開されてしまう。不都合：大量にメモリを消費してしまう
   # 上記を回避するため→forcachを使って'1行ずつ'展開してメモリを節約する
   def self.import(file)
+    ary = []
+    con = 0
+    to = 0
     CSV.foreach(file.path, headers: true, encoding: 'Shift_JIS:UTF-8') do |row|
       # IDが見つかれば、レコードを呼び出し、見つかれなければ、新しく作成
-      user = find_by(id: row[:id]) || new
+      user = find_by(id: row["id"]) || new
       # CSVからデータを取得し、設定する
       # rowに格納されたデータをto_hashでハッシュ化(キーとそれに対応する値の形にする→apple100円：apple => 100と表記するもの)
       # 上記の続き:Hashオブジェクトでsliceメソッドを利用することで、引数に渡したキーに該当するペアだけのハッシュを取得できます。
@@ -104,14 +108,18 @@ class User < ApplicationRecord
       # ※★ハッシュの表記:hash= {"apple" => 100}の他にシンボル表記できる{:apple => 100}→簡略化{apple: 100}
       # ※★参考サイトhttps://qiita.com/iron-breaker/items/32710004f0bb2e2babb6
       user.attributes = row.to_hash.slice(*updatable_attributes)
-      if @user.valid?
-        @user.save
-      else
-        flash[:danger] = "#{@user.name}の更新は失敗しました。<br>" + @user.errors.full_messages.join("<br>")
-        render :index
+      user.save
+      con += 1
+      if !user.save
+       ary[to] = "#{user.name}のレコードにエラーがあります<br>" + user.errors.full_messages.join("<br>")
+       
+       to = to +1
       end
-     
+
+      
     end
+    
+    return ary, to
   end
 
   # self.import(file)関連、更新を許可するカラムを定義
