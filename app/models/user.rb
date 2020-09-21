@@ -112,14 +112,14 @@ class User < ApplicationRecord
       con += 1
       if !user.save
        ary[to] = "#{user.name}のレコードにエラーがあります<br>" + user.errors.full_messages.join("<br>")
-       
+       con = con - 1
        to = to +1
       end
 
       
     end
     
-    return ary, to
+    return ary, con
   end
 
   # self.import(file)関連、更新を許可するカラムを定義

@@ -82,9 +82,13 @@ class UsersController < ApplicationController
   def import
     
    cnt, a = User.import(params[:file])
-   
-   
-   flash[:danger] = "<br>#{cnt[0]}<br>""<br>#{cnt[1]}<br>""<br>#{cnt[2]}<br>"
+   if cnt != nil
+    flash[:warning] ="既に登録されているユーザー情報を更新したいのなら、こちらのページで直接行ってください。"
+   end
+   if a >= 1
+    flash[:success] ="#{a}件追加・登録しました。"
+   end
+   flash[:danger] = "<br>#{cnt[0]}<br>""<br>#{cnt[1]}<br>""<br>#{cnt[2]}<br>""<br>#{cnt[3]}<br>""<br>#{cnt[4]}"
    
    redirect_to users_url
   end
