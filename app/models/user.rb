@@ -111,7 +111,7 @@ class User < ApplicationRecord
       user.save
       con += 1
       if !user.save
-       ary[to] = "#{user.name}のレコードにエラーがあります<br>" + user.errors.full_messages.join("<br>")
+       ary[to] = "読み込んだ、#{user.name}のレコードにエラーがあります<br>" + user.errors.full_messages.join("<br>") + "<br> 修正してください"
        con = con - 1
        to = to +1
       end
