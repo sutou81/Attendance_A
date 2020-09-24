@@ -1,5 +1,5 @@
 
-<%= form_with(model: user, local: true) do |f| %>
+<%= form_with(model: user, method: :patch, local: true) do |f| %>
   <%= render 'shared/error_messages', object: user %>
 
   <%= f.label :name, class: "label-#{yield(:class_text)}" %>

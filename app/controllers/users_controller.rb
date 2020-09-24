@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   require 'rounding'
   before_action :set_user, only: [:show, :edit, :update, :destroy, :edit_basic_info, :update_basic_info]
   before_action :logged_in_user, only: [:edit, :update, :destroy, :index, :edit_basic_info, :update_basic_info]
-  before_action :correct_user, only: [:edit, :update]
+  before_action :correct_user, only: [:edit]
   before_action :show_access_limit, only: :show
   before_action :admin_user, only: [:index, :destroy, :edit_basic_info, :update_basic_info]
   before_action :set_one_month, only: :show
@@ -38,11 +38,20 @@ class UsersController < ApplicationController
   end
   
   def update
-    if @user.update_attributes(user_params)
-      flash[:success] = 'ユーザー情報を更新しました'
-      redirect_to user_url(@user)
+    if current_user.admin?
+      if @user.update_attributes(new_user_params)
+        flash[:success] = "#{@user.name}の基本情報を更新しました"
+        redirect_to users_path
+      else
+        render :index
+      end
     else
-      render :edit
+      if @user.update_attributes(user_params)
+        flash[:success] = 'ユーザー情報を更新しました'
+        redirect_to user_url(@user)
+      else
+        render :edit
+      end
     end
   end
   
@@ -99,6 +108,10 @@ class UsersController < ApplicationController
   
     def user_params
       params.require(:user).permit(:name, :email, :department, :password, :password_cofirmation)
+    end
+
+    def new_user_params
+      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :uid, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
     end
     
     def basic_info_params
