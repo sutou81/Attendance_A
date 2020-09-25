@@ -19,3 +19,19 @@ User.create!(name: "Sample User",
                password: password,
                password_confirmation: password)
 end
+
+
+User.create!(name: "上長A",
+  email: "superior-1@email.com",
+  employee_number: "1001".to_i,
+  password: "password",
+  password_confirmation: "password",
+  superior: true)
+
+
+  User.create!(name: "上長B",
+    email: "superior-2@email.com",
+    employee_number: "1002".to_i,
+    password: "password",
+    password_confirmation: "password",
+    superior: true)

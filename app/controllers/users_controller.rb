@@ -43,6 +43,8 @@ class UsersController < ApplicationController
         flash[:success] = "#{@user.name}の基本情報を更新しました"
         redirect_to users_path
       else
+        flash[:danger] = @user.errors.full_messages.join("<br>")
+        @user = User.paginate(page: params[:page]).search(params[:search])
         render :index
       end
     else
@@ -91,10 +93,11 @@ class UsersController < ApplicationController
   def import
     
    cnt, a = User.import(params[:file])
-   if cnt != nil
+   cnt1 =cnt.count
+    if cnt1 > 0
     flash[:warning] ="既に登録されているユーザー情報を更新したいのなら、こちらのページで直接行ってください。"
     flash[:danger] = "<br>#{cnt[0]}<br>""<br>#{cnt[1]}<br>""<br>#{cnt[2]}<br>""<br>#{cnt[3]}<br>""<br>#{cnt[4]}"
-   end
+    end
    if a >= 1
     flash[:success] ="#{a}件追加・登録しました。"
    end
