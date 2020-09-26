@@ -90,6 +90,8 @@ class User < ApplicationRecord
     end
   end
 
+  #
+
   # importメソッド
   # foreachの説明→eachを使うと対象データが全てメモリに展開されてしまう。不都合：大量にメモリを消費してしまう
   # 上記を回避するため→forcachを使って'1行ずつ'展開してメモリを節約する
