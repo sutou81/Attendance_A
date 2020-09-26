@@ -37,23 +37,14 @@ class UsersController < ApplicationController
   def edit
   end
   
+  # もし、更新エラーをユーザー一覧ページに表示したいなら 以下の文を挿入
+  # flash[:danger] = @user.errors.full_messages.join("<br>") redirect_to users_path(@user)
   def update
-    if current_user.admin?
-      if @user.update_attributes(new_user_params)
-        flash[:success] = "#{@user.name}の基本情報を更新しました"
-        redirect_to users_path
-      else
-        flash[:danger] = @user.errors.full_messages.join("<br>")
-        @user = User.paginate(page: params[:page]).search(params[:search])
-        render :index
-      end
+    if @user.update_attributes(new_user_params)
+      flash[:success] = "#{@user.name}の基本情報を更新しました"
+      redirect_to users_url(@user)
     else
-      if @user.update_attributes(user_params)
-        flash[:success] = 'ユーザー情報を更新しました'
-        redirect_to user_url(@user)
-      else
-        render :edit
-      end
+      render :edit
     end
   end
   

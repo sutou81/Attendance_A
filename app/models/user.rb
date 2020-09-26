@@ -17,6 +17,7 @@ class User < ApplicationRecord
   # allow_blank: true→空文字""の場合バリデーションをスルー
   # 上記の続き:存在性の検証を入れていないことから、空の状態で送信し、2文字上の検証に引っかからないようにするために追加
   validates :department, length: {in: 2..30}, allow_blank: true
+  validates :affiliation, length: {in: 2..30}, allow_blank: true
   validates :basic_time, presence: true
   validates :work_time, presence: true
   validates :employee_number, uniqueness: true

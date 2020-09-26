@@ -6,7 +6,8 @@
       それに基づき2番目の引数で指定した英単語を複数形に変換して値を返します。
       今回errorsの複数形にする
       errors.full_messages:エラーを略さず表示勤怠5章 -->
-      入力エラーが<%= @user.errors.count %>件ありました
+      入力エラーが<%= object.errors.count %>件ありました
+      
     </div>
     <ul>
     <% @user.errors.full_messages.each do |msg| %>
