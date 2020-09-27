@@ -29,26 +29,41 @@
     </div>
     <div>
       <table class="table table-bordered table-condensed table-hover table-striped" id="table-attendances">
-        <thead>
-          <tr>
-            <th rowspan="2">日付</th>
-            <th rowspan="2">曜日</th>
-            <th rowspan="2">出勤登録</th>
-            <th colspan="2">出社</th>
-            <th colspan="2">退社</th>
-            <th rowspan="2">在社時間</th>
-            <th rowspan="2">備考</th>
-          </tr>
-          <tr>
-            <th>時</th>
-            <th>分</th>
-            <th>時</th>
-            <th>分</th>
-          </tr>
-        </thead>
+      <thead>
+        <tr>
+          <th rowspan="3">残業申請</th>
+          <th rowspan="3">日付</th>
+          <th rowspan="3">曜日</th>
+          <th colspan="8"><br>【実績】</th>
+          <th colspan="8"><br>【所定外勤務】</th>
+        </tr>
+        <tr>
+          <th colspan="3"><br>出社</th>
+          <th colspan="3"><br>退社</th>
+          <th rowspan="2">在社時間</th>
+          <th rowspan="2">備考</th>
+          <th colspan="2"><br>終了予定時間</th>
+          <th rowspan="2">時間外時間</th>
+          <th rowspan="2">業務処理内容</th>
+          <th colspan="2">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;指示者確認㊞&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;</th>
+        </tr>
+        <tr>
+          <th>時</th>
+          <th>分</th>
+          <th></th>
+          <th>時</th>
+          <th>分</th>
+          <th></th>
+          <th>時</th>
+          <th>分</th>
+          <th>勤怠</th>
+          <th>残業</th>
+        </tr>
+    </thead>
         <tbody>
           <% @attendances.each do |day| %>
           <tr>
+            <td></td>
             <td><%= l(day.worked_on, format: :short) %></td>
             <% if day.worked_on.wday == 6
                 x = "sat"
@@ -56,15 +71,16 @@
                 x = "sun"
               end %>
             <td class="<%= x %>"><%= $days_of_the_week[day.worked_on.wday] %></td>
+            <td><%= l(day.started_at, format: :time1) if day.started_at.present? %></td>
+            <td><%= l(day.started_at.floor_to(15.minutes), format: :time2) if day.started_at.present? %></td>
             <td>
               <% if btn_text = attendance_state(day) %>
                 <%= link_to "#{btn_text}登録", user_attendance_path(@user, day), method: :patch, class:"btn btn-primary btn-attendance" %>
               <% end %>  
             </td>
-            <td><%= l(day.started_at, format: :time1) if day.started_at.present? %></td>
-            <td><%= l(day.started_at.floor_to(15.minutes), format: :time2) if day.started_at.present? %></td>
             <td><%= l(day.finished_at, format: :time1) if day.finished_at.present? %></td>
             <td><%= l(day.finished_at.floor_to(15.minutes), format: :time2) if day.finished_at.present? %></td>
+            <td></td>
             <td><!-- 出社時間と退社時間が存在するか確認した上でメソッドを呼び出し在社時間を計算
                 1日の在社時間を出すと共に累計時間も計算してる -->
               <% if day.started_at.present? && day.finished_at.present? %>
@@ -73,22 +89,28 @@
               <% end %>
             </td>
             <td><%= day.note %></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
           </tr>
           <% end %>
         </tbody>
         <tfoot>
           <tr>
-            <th colspan="2">累計日数</th>
-            <th colspan="3">総合勤務時間</th>
-            <th colspan="3">累計在社時間</th>
-            <th>所長承認</th>
+            <th colspan="4">累計日数</th>
+            <th colspan="5">総合勤務時間</th>
+            <th colspan="5">累計在社時間</th>
+            <th colspan="3">所長承認</th>
           </tr>
           <tr>
-            <td colspan="2"><%= @attendances.count %></td>
+            <td colspan="4"><%= @attendances.count %></td>
             <!-- 戻り値を整数にするのに→to_fメソッドを使用　勤怠10章参照 -->
-            <td colspan="3"><%= format_basic_info(@user.work_time).to_f * @worked_sum %></td>
-            <td colspan="3"><%= format("%.2f",@todal_working_times.to_f) %></td>
-            <td></td>
+            <td colspan="5"><%= format_basic_info(@user.work_time).to_f * @worked_sum %></td>
+            <td colspan="5"><%= format("%.2f",@todal_working_times.to_f) %></td>
+            <td colspan="3"></td>
           </tr>
         </tfoot>
         
