@@ -36,6 +36,11 @@
     
   }
   
+  th.table-padding {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    vertical-align: middle;
+  }
   td {
     vertical-align: middle;
     text-align: center;
@@ -45,6 +50,8 @@
     border-right: none;
   }
 }
+
+
 
 /* ユーザー一覧ページ */
 
