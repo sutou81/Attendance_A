@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
     @last_day = @first_day.end_of_month
     @one_month = [*@first_day..@last_day] 
     @count = [*1..@one_month.count]
-    # ↓1ヶ月分のユーザーに紐付く勤怠データを検索し取得する　それを＠attendancesに入れてる
+    # ↓1ヶ月分のユーザーに紐付く勤怠データを検索し取得する それを＠attendancesに入れてる
     @attendances = @user.attendances.where(worked_on: @first_day..@last_day).order(:worked_on)
     
     # 1ヶ月の日数と勤怠データ（@userの）の数が一致しなかったら以下(Activ～)を実行する

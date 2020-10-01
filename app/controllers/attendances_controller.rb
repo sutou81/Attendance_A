@@ -26,6 +26,7 @@ class AttendancesController < ApplicationController
   end
   
   def edit_one_month
+    
   end
   
   # 繰り返し処理の中では、まずはじめにidを使って更新対象となるオブジェクトを変数に代入します。
@@ -51,6 +52,18 @@ class AttendancesController < ApplicationController
   rescue ActiveRecord::RecordInvalid # トランザクション���よるエラーの分岐です。
     flash[:danger] = "無効な入力データがあった為、更新をキャンセルしました。"
     redirect_to attendances_edit_one_month_user_url(date: params[:date]) and return
+  end
+
+   # 残業申請のモーダル
+  def edit_overwork_request
+    @user = User.find(params[:user_id])
+    @attendance = Attendance.find(params[:id])
+    @superior = User.where(superior: true)
+  end
+
+  # 残業申請モーダル更新
+  def update_overwork_request
+    debugger
   end
   
   private

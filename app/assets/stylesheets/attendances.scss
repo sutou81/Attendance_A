@@ -1,3 +1,30 @@
-// Place all the styles related to the Attendances controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+.no-border {
+  border: none;
+}
+
+/* 土日に文字色を変える */
+.sat {
+  color: blue;
+}
+
+.sun {
+  color: red;
+}
+
+/* 残業申請フォームの時間入力のスタイル */
+.display {
+  display: inline-block !important;
+}
+
+.text {
+  th {
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  td{
+    vertical-align: middle;
+    text-align: center;
+  }
+
+}

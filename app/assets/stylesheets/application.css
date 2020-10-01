@@ -13,3 +13,19 @@
  *= require_tree .
  *= require_self
  */
+ .no-border {
+  border: none;
+}
+
+.overwork-application-style {
+  padding: 15px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* 残業申請フォームのスタイル */
+.display {
+  display: inline-block !important;
+  width: auto !important;
+}
+

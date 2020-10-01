@@ -15,10 +15,17 @@ Rails.application.routes.draw do
     member do
       get 'edit_basic_info'
       patch 'update_basic_info'
+      get 'attendances/edit_overwork_request' # 残業申請に関する追加
+      patch 'attendances/update_overwork_request' # 残業申請に関する追加
       get 'attendances/edit_one_month' # この行が追加対象です。
       patch 'attendances/update_one_month' # この行が追加対象です。
     end
     collection { post :import } 
-    resources :attendances, only: :update # この行を追加します。
+    resources :attendances do
+      member do 
+        get 'edit_overwork_request'
+        patch 'update_overwork_request'
+      end
+    end
   end
 end

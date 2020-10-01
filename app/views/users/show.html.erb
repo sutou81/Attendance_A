@@ -63,7 +63,7 @@
         <tbody>
           <% @attendances.each do |day| %>
           <tr>
-            <td></td>
+            <td><%= link_to "残業申請",edit_overwork_request_user_attendance_path(@user, day), remote: true, class: "btn btn-primary"  %></td>
             <td><%= l(day.worked_on, format: :short) %></td>
             <% if day.worked_on.wday == 6
                 x = "sat"
@@ -117,3 +117,6 @@
       </table>
     </div>
   </div>
+
+  <!--残業申請モーダルウインドウ表示-->
+  <div id="request_overtime_info"class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
