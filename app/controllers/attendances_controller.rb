@@ -56,8 +56,8 @@ class AttendancesController < ApplicationController
 
    # 残業申請のモーダル
   def edit_overwork_request
-    @user = User.find(params[:user_id])
     @attendance = Attendance.find(params[:id])
+    @user = User.find(@attendance.user_id)
     @superior = User.where(superior: true)
   end
 
@@ -65,18 +65,33 @@ class AttendancesController < ApplicationController
   def update_overwork_request
     @attendance = Attendance.find(params[:id])
     @user =User.find(params[:user_id])
-    t = params[:attendance]["sceduled_end_time(4i)"] + ':' + params[:attendance]["sceduled_end_time(5i)"]
-    params[:attendance][:sceduled_end_time] = Time.strptime(t, "%H:%M")
-    debugger
-
+    @superior = User.find(params[:user][:attendances][:instructor_confirmation])
+    t = params[:user][:attendances]["sceduled_end_time(4i)"] + ':' + params[:user][:attendances]["sceduled_end_time(5i)"] # select_timeのバラバラのパラメーター中身を結合して無理やり時間表記してる 型:string
+    params[:user][:attendances][:sceduled_end_time] = Time.strptime(t, "%H:%M") # String型の時間表記を、Time型に直してる
+    params[:user][:attendances][:overtime_application_status] = "#{@superior.name}へ残業申請中"
     
+    @attendance.sceduled_end_time = Time.strptime(t, "%H:%M")
     
+    @attendance.save
+    
+    if @attendance.update_attributes(overwork_params)
+      flash[:success] = "残業を申請しました"
+    else
+      flash[:danger] = "申請をキャンセルしました"
+    end
+    redirect_to user_url(@user)
+      
   end
   
   private
     # 1ヶ月分の勤怠情報を扱います。勤怠11章テキスト説明あり
     def attendances_params
       params.require(:user).permit(attendances: [:started_at, :finished_at, :note])[:attendances]
+    end
+
+    # 残業情報を扱う
+    def overwork_params
+      params.require(:user).permit(attendances: [:sceduled_end_time, :next_day, :business_content, :instructor_confirmation, :overtime_application_status])[:attendances]
     end
   
   # beforeフィルター
