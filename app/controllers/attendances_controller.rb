@@ -63,7 +63,14 @@ class AttendancesController < ApplicationController
 
   # 残業申請モーダル更新
   def update_overwork_request
+    @attendance = Attendance.find(params[:id])
+    @user =User.find(params[:user_id])
+    t = params[:attendance]["sceduled_end_time(4i)"] + ':' + params[:attendance]["sceduled_end_time(5i)"]
+    params[:attendance][:sceduled_end_time] = Time.strptime(t, "%H:%M")
     debugger
+
+    
+    
   end
   
   private
