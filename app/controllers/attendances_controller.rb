@@ -70,7 +70,7 @@ class AttendancesController < ApplicationController
       if params[:user][:attendances][:instructor_confirmation].present?
         @superior = User.find(params[:user][:attendances][:instructor_confirmation])
       end
-     
+      params[:user][:attendances][:overtime_application_status] = "#{@superior.name}へ残業申請中"
       @attendance.update_attributes!(overwork_params)
       m = Time.current
       @attendance.sceduled_end_time = Time.new(m.year, m.month, m.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
