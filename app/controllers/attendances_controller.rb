@@ -59,29 +59,33 @@ class AttendancesController < ApplicationController
     @attendance = Attendance.find(params[:id])
     @user = User.find(@attendance.user_id)
     @superior = User.where(superior: true)
+    
   end
 
   # 残業申請モーダル更新
   def update_overwork_request
-    @attendance = Attendance.find(params[:id])
-    @user =User.find(params[:user_id])
-    @superior = User.find(params[:user][:attendances][:instructor_confirmation])
-    t = params[:user][:attendances]["sceduled_end_time(4i)"] + ':' + params[:user][:attendances]["sceduled_end_time(5i)"] # select_timeのバラバラのパラメーター中身を結合して無理やり時間表記してる 型:string
-    params[:user][:attendances][:sceduled_end_time] = Time.strptime(t, "%H:%M") # String型の時間表記を、Time型に直してる
-    params[:user][:attendances][:overtime_application_status] = "#{@superior.name}へ残業申請中"
-    
-    @attendance.sceduled_end_time = Time.strptime(t, "%H:%M")
-    
-    @attendance.save
-    
-    if @attendance.update_attributes(overwork_params)
-      flash[:success] = "残業を申請しました"
-    else
-      flash[:danger] = "申請をキャンセルしました"
-    end
-    redirect_to user_url(@user)
+    ActiveRecord::Base.transaction do # トランザクションを開始します。
+      @attendance = Attendance.find(params[:id])
+      @user =User.find(params[:user_id])
+      if params[:user][:attendances][:instructor_confirmation].present?
+        @superior = User.find(params[:user][:attendances][:instructor_confirmation])
+      end
+     
+      @attendance.update_attributes!(overwork_params)
+      m = Time.current
+      @attendance.sceduled_end_time = Time.new(m.year, m.month, m.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
+      params[:user][:attendances][:sceduled_end_time] = Time.new(m.year, m.month, m.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
+      @attendance.save
       
+      
+    end
+    flash[:success] = "残業を申請しました"
+    redirect_to user_url(@user)
+  rescue ActiveRecord::RecordInvalid # トランザクション���よるエラーの分岐です。
+    flash[:danger] = "未入力な項目があった為、申請をキャンセルしました。"
+    redirect_to user_url(@user) and return
   end
+  
   
   private
     # 1ヶ月分の勤怠情報を扱います。勤怠11章テキスト説明あり

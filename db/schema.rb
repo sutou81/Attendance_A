@@ -36,16 +36,16 @@ ActiveRecord::Schema.define(version: 2020_10_05_085632) do
     t.datetime "updated_at", null: false
     t.string "password_digest"
     t.string "department"
-    t.datetime "basic_time", default: "2020-10-04 23:00:00"
-    t.datetime "work_time", default: "2020-10-04 22:30:00"
+    t.datetime "basic_time", default: "2020-10-08 23:00:00"
+    t.datetime "work_time", default: "2020-10-08 22:30:00"
     t.string "remember_digest"
     t.boolean "admin", default: false
     t.string "affiliation"
     t.integer "employee_number"
     t.string "uid"
-    t.datetime "basic_work_time", default: "2020-10-04 23:00:00"
-    t.datetime "designated_work_start_time", default: "2020-10-04 23:30:00"
-    t.datetime "designated_work_end_time", default: "2020-10-05 08:30:00"
+    t.datetime "basic_work_time", default: "2020-10-08 23:00:00"
+    t.datetime "designated_work_start_time", default: "2020-10-08 23:30:00"
+    t.datetime "designated_work_end_time", default: "2020-10-09 08:30:00"
     t.boolean "superior", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end

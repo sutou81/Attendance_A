@@ -21,6 +21,8 @@ class User < ApplicationRecord
   validates :basic_time, presence: true
   validates :work_time, presence: true
   validates :employee_number, uniqueness: true
+  VALID_UID = /\A[a-z0-9]+\z/i
+  validates :uid, format: { with: VALID_UID, message: ' 半角英数文字のみ入力可能です'  }
   # allow_nil:これでは新規作成の時もパスワードのバリデーションがスルーされてしまうのでは？
   # has_secure_passwordがオブジェクト生成時に存在性を検証するようになっています。
   has_secure_password

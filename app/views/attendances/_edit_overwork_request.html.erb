@@ -27,6 +27,7 @@
 						</thead>
 						<tbody>
               <%= f.fields_for :attendances, @attendance do |attendance| %>
+                <%= render 'shared/error_messages', object: @attendance %>
               
                 <tr>
                   <td><%= l(@attendance.worked_on, format: :short) %></td>
@@ -36,12 +37,10 @@
                       x = "sun"
                     end %>
                   <td class="<%= x %>"><%= $days_of_the_week[@attendance.worked_on.wday] %></td>
-                  <td><%= attendance.time_select :sceduled_end_time, {include_blank: true, time_separator: ':'}, class: "form-control display" %></td>
+                  <td><div class="form-inline"><%= attendance.time_select :sceduled_end_time, {include_blank: true, time_separator: ':'}, class: "form-control " %></div></td>
                   <td><%= attendance.check_box :next_day %></td>
-                  <td><%= attendance.text_field :business_content, class: "form-control" %></td>
-
-
-                  <td><%= attendance.collection_select :instructor_confirmation, @superior, :id, :name, include_blank: true, class: "form-control" %></td>
+                  <td><%= attendance.text_field :business_content, placeholder: "入力して下さい", class: "form-control" %></td>
+                  <td><%= attendance.collection_select :instructor_confirmation, @superior, :id, :name,  {prompt: "選択して下さい"}, {class: "form-control"} %></td>
                 <tr>
               <% end %>
 						</tbody>				
