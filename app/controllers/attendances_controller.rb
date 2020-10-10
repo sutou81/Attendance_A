@@ -106,6 +106,8 @@ class AttendancesController < ApplicationController
         @attendance.overtime_application_status = "#{@superior.name}へ残業申請中"
         @attendance.instructor_confirmation = params[:user][:attendances][:instructor_confirmation]
       end
+      debugger
+      @attendance.sceduled_end_time = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
       if @attendance.valid?(:update_overwork_request) && @attendance.valid?(:update_overwork_request1)
         @attendance.update_attributes!(overwork_params)
         m = Time.current
