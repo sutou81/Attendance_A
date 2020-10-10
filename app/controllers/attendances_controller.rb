@@ -43,25 +43,41 @@ class AttendancesController < ApplicationController
         @attendance = Attendance.find(id)
         if params[:user][:attendances][id][:oneday_instructor_confirmation].present?
           @superior1 = User.find(params[:user][:attendances][id][:oneday_instructor_confirmation])
+          @attendance.started_at = params[:user][:attendances][id][:started_at]
+          @attendance.finished_at = params[:user][:attendances][id][:finished_at]
+          @attendance.oneday_instructor_confirmation = params[:user][:attendances][id][:oneday_instructor_confirmation]
+          # 変更がないものを更新とみなさない為に下記のunless文
+          unless @attendance.started_at_in_database == @attendance.started_at && @attendance.finished_at_in_database == @attendance.finished_at && @attendance.oneday_instructor_confirmation_in_database == @attendance.oneday_instructor_confirmation
+            
+            @attendance.oneday_instructor_confirmation = params[:user][:attendances][id][:oneday_instructor_confirmation]
+            # update_one_monthの場所だけにバリデーションを効かせたい為にコンテキストを使用
+            if @attendance.oneday_instructor_confirmation.present? #@attendance.valid?(:update_one_month)
+              @attendance.attendance_application_status = "#{@superior1.name}へ勤怠編集申請中"
+              
+              count += 1 if @attendance.update_attributes!(item)
+            end
+          end
         end
         # if item[:started_at].present? && item[:finished_at].blank?
         #   flash[:danger] = "終了時間が入力されてません。"
         #   redirect_to attendances_edit_one_month_user_url(date: params[:date]) and return
         # end
-        if  @attendance != params[:user][:attendances][id]
-          params[:user][:attendances][id][:attendance_application_status] = "#{@superior1.name}へ勤怠編集申請中"
-          @attendance.attendance_application_status = "#{@superior1.name}へ勤怠編集申請中"
-        end
-        if @attendance.changed?
-          debugger
-          count += 1
-        end
-        if @attendance.valid?(:update_one_month)
-          @attendance.update_attributes!(item)
-        end       
+        # if @attendance.changed?
+        #   debugger
+        #   count += 1
+        # end
+        # if  @attendance != params[:user][:attendances][id]
+        #   params[:user][:attendances][id][:attendance_application_status] = "#{@superior1.name}へ勤怠編集申請中"
+        #   @attendance.attendance_application_status = "#{@superior1.name}へ勤怠編集申請中"
+        #   debugger
+        # end
+        
+        # if @attendance.valid?(:update_one_month)
+        #   @attendance.update_attributes!(item)
+        # end       
       end
     end
-    if count>1
+    if count > 0
       flash[:success] = "勤怠変更を合計#{count}件申請しました。"
     else
       flash[:success] = "勤怠の変更はありません"
