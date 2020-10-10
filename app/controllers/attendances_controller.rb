@@ -26,7 +26,7 @@ class AttendancesController < ApplicationController
   end
   
   def edit_one_month
-    
+    @superior = User.where(superior: true)
   end
   
   # 繰り返し処理の中では、まずはじめにidを使って更新対象となるオブジェクトを変数に代入します。
@@ -37,17 +37,35 @@ class AttendancesController < ApplicationController
   # *flash～初めのredirect_to→全ての繰返し更新処理が問題なく完了した時はこの部分の処理を実行
   # *rescue以下→例外が発生した時は、この部分の処理を実行
   def update_one_month
+    count = 0
     ActiveRecord::Base.transaction do # トランザクションを開始します。
       attendances_params.each do |id, item|
         @attendance = Attendance.find(id)
+        if params[:user][:attendances][id][:oneday_instructor_confirmation].present?
+          @superior1 = User.find(params[:user][:attendances][id][:oneday_instructor_confirmation])
+        end
         # if item[:started_at].present? && item[:finished_at].blank?
         #   flash[:danger] = "終了時間が入力されてません。"
         #   redirect_to attendances_edit_one_month_user_url(date: params[:date]) and return
         # end
-        @attendance.update_attributes!(item)
+        if  @attendance != params[:user][:attendances][id]
+          params[:user][:attendances][id][:attendance_application_status] = "#{@superior1.name}へ勤怠編集申請中"
+          @attendance.attendance_application_status = "#{@superior1.name}へ勤怠編集申請中"
+        end
+        if @attendance.changed?
+          debugger
+          count += 1
+        end
+        if @attendance.valid?(:update_one_month)
+          @attendance.update_attributes!(item)
+        end       
       end
     end
-    flash[:success] = "1ヶ月分の勤怠情報を更新しました。"
+    if count>1
+      flash[:success] = "勤怠変更を合計#{count}件申請しました。"
+    else
+      flash[:success] = "勤怠の変更はありません"
+    end
     redirect_to user_url(date: params[:date])
   rescue ActiveRecord::RecordInvalid # トランザクション���よるエラーの分岐です。
     flash[:danger] = "無効な入力データがあった為、更新をキャンセルしました。"
@@ -55,7 +73,7 @@ class AttendancesController < ApplicationController
   end
 
    # 残業申請のモーダル
-  def edit_overwork_request
+   def edit_overwork_request
     @attendance = Attendance.find(params[:id])
     @user = User.find(@attendance.user_id)
     @superior = User.where(superior: true)
@@ -63,19 +81,32 @@ class AttendancesController < ApplicationController
   end
 
   # 残業申請モーダル更新
-  def update_overwork_request
+   def update_overwork_request
     ActiveRecord::Base.transaction do # トランザクションを開始します。
       @attendance = Attendance.find(params[:id])
       @user =User.find(params[:user_id])
       if params[:user][:attendances][:instructor_confirmation].present?
         @superior = User.find(params[:user][:attendances][:instructor_confirmation])
+        @attendance.overtime_application_status = "#{@superior.name}へ残業申請中"
+        @attendance.instructor_confirmation = params[:user][:attendances][:instructor_confirmation]
       end
-      params[:user][:attendances][:overtime_application_status] = "#{@superior.name}へ残業申請中"
-      @attendance.update_attributes!(overwork_params)
-      m = Time.current
-      @attendance.sceduled_end_time = Time.new(m.year, m.month, m.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
-      params[:user][:attendances][:sceduled_end_time] = Time.new(m.year, m.month, m.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
-      @attendance.save
+      if params[:user][:attendances][:sceduled_end_time] != @attendance.sceduled_end_time
+        @attendance.sceduled_end_time = params[:user][:attendances][:sceduled_end_time]
+      end
+        
+
+      
+
+      if @attendance.valid?(:update_overwork_request) && @attendance.valid?(:update_overwork_request1)
+        @attendance.update_attributes!(overwork_params)
+        m = Time.current
+        @attendance.sceduled_end_time = Time.new(m.year, m.month, m.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
+        params[:user][:attendances][:sceduled_end_time] = Time.new(m.year, m.month, m.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
+        @attendance.save!
+      else
+        @attendance.attributes = {instructor_confirmation: nil, sceduled_end_time: nil}
+        @attendance.save!(context: :update_overwork_request)
+      end
       
       
     end
@@ -90,7 +121,7 @@ class AttendancesController < ApplicationController
   private
     # 1ヶ月分の勤怠情報を扱います。勤怠11章テキスト説明あり
     def attendances_params
-      params.require(:user).permit(attendances: [:started_at, :finished_at, :note])[:attendances]
+      params.require(:user).permit(attendances: [:started_at, :finished_at, :note, :oneday_instructor_confirmation, :attendance_application_status])[:attendances]
     end
 
     # 残業情報を扱う
@@ -108,4 +139,3 @@ class AttendancesController < ApplicationController
     end
   end
 end
-""

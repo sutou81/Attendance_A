@@ -1,5 +1,5 @@
 <% provide(:title, @user.name) %>
-<div class="container">
+<div class="container-fluid">
     <div>
       <table class="table table-bordered table-condensed user-table">
         <tbody>
@@ -24,11 +24,18 @@
         </tbody>
       </table>
     </div>
-    <div class="btn-user-show">
-      <%= link_to "勤怠を編集", attendances_edit_one_month_user_path(date: @first_day), class:"btn btn-success margin-bottom" %>
-    </div>
+    <!--<div class="btn-user-show">-->
+      <table class="table-in-botton">
+        <tr>
+          <td><%= link_to "勤怠を編集", attendances_edit_one_month_user_path(date: @first_day), class:"btn btn-primary margin-bottom" %></td>
+          <td>&ensp;<%= link_to "CSV出力", '#', class:"btn btn-primary margin-bottom" %></td>
+        </tr>
+        <tr><td colspan="2"><%= link_to " 勤怠修正ログ (承認済み)", '#', class:"btn btn-primary table-in-botton-adjustment" %></td></tr>
+      </table>
+    <!--</div>-->
+     
     <div>
-      <table class="table table-bordered table-condensed table-hover table-striped" id="table-attendances">
+      <table class="table table-bordered table-condensed table-hover table-striped col-md-12" id="table-attendances">
       <thead>
         <tr>
           <th rowspan="3">残業申請</th>
@@ -45,7 +52,7 @@
           <th colspan="2">終了予定時間</th>
           <th rowspan="2">時間外時間</th>
           <th rowspan="2">業務処理内容</th>
-          <th colspan="2">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;指示者確認㊞&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;</th>
+          <th colspan="4">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;指示者確認㊞&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;</th>
         </tr>
         <tr>
           <th>時</th>
@@ -93,8 +100,8 @@
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
-            <td><%= day.overtime_application_status %></td>
+            <td class="col-xs-3 col-ms-3 col-md-2 col-lg-2"><%= day.attendance_application_status %></td>
+            <td class="col-xs-3 col-ms-3 col-md-2 col-lg-2"><%= day.overtime_application_status %></td>
           </tr>
           <% end %>
         </tbody>

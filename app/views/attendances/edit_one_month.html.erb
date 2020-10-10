@@ -11,6 +11,7 @@
           <th>退勤時間</th>
           <th>在社時間</th>
           <th>備考</th>
+          <th>指示者確認㊞ </th>
         </tr>
       </thead>
       <tbodY>
@@ -52,6 +53,7 @@
   
               </td>
               <td><%= attendance.text_field :note, class:"form-control" %></td>
+              <td><%= attendance.collection_select :oneday_instructor_confirmation, @superior, :id, :name,  {prompt: "選択して下さい"}, {class: "form-control"} %></td>
             </tr>
           <% end %>
         <% end %>  
@@ -60,8 +62,9 @@
   </div>
   
   <div class="center">
-    <%= f.submit "まとめて更新", class: "btn btn-lg btn-primary" %>
     <%= link_to "キャンセル", user_path(date:@first_day), class:"btn btn-lg btn-default" %>
+    <%= f.submit "編集を保存する", class: "btn btn-lg btn-primary" %>
+    
   </div>
 <% end %>
 <script>

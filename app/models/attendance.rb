@@ -3,7 +3,9 @@ class Attendance < ApplicationRecord
   belongs_to :user
   validates :worked_on, presence: true
   validates :note, length: { maximum: 50 }
-
+  validates :sceduled_end_time, presence: true, on: :update_overwork_request1
+  validates :instructor_confirmation, presence: true, on: :update_overwork_request
+  validates :oneday_instructor_confirmation, presence: true, on: :update_one_month
   # 出勤時間が存在しない場合、退勤時間は無効(↓カスタムのバリデーション)
   # validate(sが付かない)→カスタムメソッドをバリデーションとして使う事ができる
   validate :finished_at_is_invalid_without_a_started_at
