@@ -48,7 +48,6 @@ class AttendancesController < ApplicationController
           @attendance.oneday_instructor_confirmation = params[:user][:attendances][id][:oneday_instructor_confirmation]
           # 変更がないものを更新とみなさない為に下記のunless文
           unless @attendance.started_at_in_database == @attendance.started_at && @attendance.finished_at_in_database == @attendance.finished_at && @attendance.oneday_instructor_confirmation_in_database == @attendance.oneday_instructor_confirmation
-            
             @attendance.oneday_instructor_confirmation = params[:user][:attendances][id][:oneday_instructor_confirmation]
             # update_one_monthの場所だけにバリデーションを効かせたい為にコンテキストを使用
             if @attendance.oneday_instructor_confirmation.present? #@attendance.valid?(:update_one_month)
@@ -58,8 +57,11 @@ class AttendancesController < ApplicationController
             end
           end
         else
-          @attendance.attributes = {oneday_instructor_confirmation: nil}
-          @attendance.save!(context: :update_one_month)
+
+          unless (params[:user][:attendances][id][:finished_at] && params[:user][:attendances][id][:started_at]).blank?
+            @attendance.attributes = {oneday_instructor_confirmation: nil}
+            @attendance.save!(context: :update_one_month)
+          end
 
         end
         # if item[:started_at].present? && item[:finished_at].blank?
