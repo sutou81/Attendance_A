@@ -10,7 +10,7 @@ class Attendance < ApplicationRecord
   # validate(sが付かない)→カスタムメソッドをバリデーションとして使う事ができる
   validate :finished_at_is_invalid_without_a_started_at
   # 出勤・退勤時間どちらも存在する時、出勤時間より早い退勤時間は無効にするもの(↓カスタムのバリデーション)
-  validate :started_at_than_finished_at_fast_if_invalid
+  validate :started_at_than_finished_at_fast_if_invalid, unless: -> { validation_context == :onday_check_box } # context: :hoge以外のときだけバリデーションする
   
   validate :finished_at_is_invalid_without_a_finished_at 
   validate :oneday_instructor_confirmation_only_update_suppression

@@ -1,56 +1,57 @@
 <% provide(:class_text, 'basic-info') %>
 <% provide(:button_text, '変更を送信する') %>
-
-<div class="modal-dialog modal-lg modal-dialog-center">
-  <div class="modal-content">
-    <div class="modal-header no-border">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="row">
-        <div class="col-md-12  overwork-application-style">
-					<h4 class="modal-title">【残業申請】</h4>
-          <%= form_with(model: @user, url: update_overwork_request_user_attendance_path(@user, @attendance), local: true, method: :patch) do |f| %>
-            <%= render 'shared/error_messages', object: @user %>
-            <table class="table table-bordered  table-hover table-striped text" >
-						<thead>
-							<tr>
-								<th>日付</th>
-								<th>曜日</th>
-								<th>終了予定時間</th>
-								<th>翌日</th>
-								<th>業務内容</th>
-								<th>指示確認㊞</th>
-							</tr>
-						</thead>
-						<tbody>
-              <%= f.fields_for :attendances, @attendance do |attendance| %>
-                <%= render 'shared/error_messages', object: @attendance %>
-              
+<div class="container">
+  <div class="modal-dialog modal-lg modal-dialog-center">
+    <div class="modal-content">
+      <div class="modal-header no-border">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12  overwork-application-style">
+            <h4 class="modal-title">【残業申請】</h4>
+            <%= form_with(model: @user, url: update_overwork_request_user_attendance_path(@user, @attendance), local: true, method: :patch) do |f| %>
+              <%= render 'shared/error_messages', object: @user %>
+              <table class="table table-bordered  table-hover table-striped text" >
+              <thead>
                 <tr>
-                  <td><%= l(@attendance.worked_on, format: :short) %></td>
-                  <% if @attendance.worked_on.wday == 6
-                      x = "sat"
-                    elsif @attendance.worked_on.wday == 0
-                      x = "sun"
-                    end %>
-                  <td class="<%= x %>"><%= $days_of_the_week[@attendance.worked_on.wday] %></td>
-                  <td><div class="form-inline"><%= attendance.time_select :sceduled_end_time, {include_blank: true, time_separator: ':'}, class: "form-control " %></div></td>
-                  <td><%= attendance.check_box :next_day %></td>
-                  <td><%= attendance.text_field :business_content, placeholder: "入力して下さい", class: "form-control" %></td>
-                  <td><%= attendance.collection_select :instructor_confirmation, @superior, :id, :name,  {prompt: "選択して下さい"}, {class: "form-control"} %></td>
-                <tr>
-              <% end %>
-						</tbody>				
-					</table>
-            <div class="center" style="margin-top:-10px;">
-                <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
-            </div>
-          
-					
-          <% end %>
+                  <th>日付</th>
+                  <th>曜日</th>
+                  <th>終了予定時間</th>
+                  <th>翌日</th>
+                  <th>業務内容</th>
+                  <th>指示確認㊞</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= f.fields_for :attendances, @attendance do |attendance| %>
+                  <%= render 'shared/error_messages', object: @attendance %>
+                
+                  <tr>
+                    <td><%= l(@attendance.worked_on, format: :short) %></td>
+                    <% if @attendance.worked_on.wday == 6
+                        x = "sat"
+                      elsif @attendance.worked_on.wday == 0
+                        x = "sun"
+                      end %>
+                    <td class="<%= x %>"><%= $days_of_the_week[@attendance.worked_on.wday] %></td>
+                    <td><div class="form-inline"><%= attendance.time_select :sceduled_end_time, {include_blank: true}, class: "form-control " %></div></td>
+                    <td><%= attendance.check_box :next_day %></td>
+                    <td><%= attendance.text_field :business_content, placeholder: "入力して下さい", class: "form-control" %></td>
+                    <td><%= attendance.collection_select :instructor_confirmation, @superior, :id, :name,  {prompt: "選択して下さい"}, {class: "form-control"} %></td>
+                  <tr>
+                <% end %>
+              </tbody>				
+            </table>
+              <div class="center" style="margin-top:-10px;">
+                  <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
+              </div>
+            
+            
+            <% end %>
+          </div>
         </div>
       </div>
     </div>

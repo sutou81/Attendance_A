@@ -45,6 +45,9 @@ class AttendancesController < ApplicationController
           @superior1 = User.find(params[:user][:attendances][id][:oneday_instructor_confirmation])
           @attendance.started_at = params[:user][:attendances][id][:started_at]
           @attendance.finished_at = params[:user][:attendances][id][:finished_at]
+          if params[:user][:attendances][id][:onday_check_box] == "1"
+            @attendance.finished_at = @attendance.finished_at+ 1.day
+          end
           @attendance.oneday_instructor_confirmation = params[:user][:attendances][id][:oneday_instructor_confirmation]
           # 変更がないものを更新とみなさない為に下記のunless文
           unless @attendance.started_at_in_database == @attendance.started_at && @attendance.finished_at_in_database == @attendance.finished_at && @attendance.oneday_instructor_confirmation_in_database == @attendance.oneday_instructor_confirmation
@@ -52,13 +55,17 @@ class AttendancesController < ApplicationController
             # update_one_monthの場所だけにバリデーションを効かせたい為にコンテキストを使用
             if @attendance.oneday_instructor_confirmation.present? #@attendance.valid?(:update_one_month)
               @attendance.attendance_application_status = "#{@superior1.name}へ勤怠編集申請中"
-              
-              count += 1 if @attendance.update_attributes!(item)
+              if params[:user][:attendances][id][:onday_check_box] == "1"
+                @attendance.attributes = {finished_at: @attendance.finished_at, onday_check_box: "1"}
+                count += 1 if @attendance.save!(context: :onday_check_box)
+              else
+                count += 1 if @attendance.update_attributes!(item)
+              end
             end
           end
         else
-
-          unless (params[:user][:attendances][id][:finished_at] && params[:user][:attendances][id][:started_at]).blank?
+          # oneday_instructor_confirmationとstarted_atとfinished_atの3つがそろわないと更新できなくする
+          unless params[:user][:attendances][id][:finished_at].blank? && params[:user][:attendances][id][:started_at].blank?
             @attendance.attributes = {oneday_instructor_confirmation: nil}
             @attendance.save!(context: :update_one_month)
           end
@@ -86,7 +93,7 @@ class AttendancesController < ApplicationController
     if count > 0
       flash[:success] = "勤怠変更を合計#{count}件申請しました。"
     else
-      flash[:success] = "勤怠の変更はありません"
+      flash[:success] = "勤怠申請の変更はありません"
     end
     redirect_to user_url(date: params[:date])
   rescue ActiveRecord::RecordInvalid # トランザクション���よるエラーの分岐です。
@@ -116,7 +123,6 @@ class AttendancesController < ApplicationController
         @attendance.sceduled_end_time = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
       end
       if @attendance.valid?(:update_overwork_request) && @attendance.valid?(:update_overwork_request1)
-       debugger
         @attendance.update_attributes!(overwork_params)
         m = Time.current
         @attendance.sceduled_end_time = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
@@ -138,7 +144,7 @@ class AttendancesController < ApplicationController
   private
     # 1ヶ月分の勤怠情報を扱います。勤怠11章テキスト説明あり
     def attendances_params
-      params.require(:user).permit(attendances: [:started_at, :finished_at, :note, :oneday_instructor_confirmation, :attendance_application_status])[:attendances]
+      params.require(:user).permit(attendances: [:started_at, :finished_at, :note, :oneday_instructor_confirmation, :attendance_application_status, :onday_check_box])[:attendances]
     end
 
     # 残業情報を扱う
