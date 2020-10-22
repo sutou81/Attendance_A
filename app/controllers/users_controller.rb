@@ -20,6 +20,11 @@ class UsersController < ApplicationController
   # @attendancesはbefore_actionのset_one_month内で指定してあるから使える
   def show
     @worked_sum = @attendances.where.not(started_at: nil).count
+    @attendance1 = Attendance.where(oneday_instructor_confirmation: @user.id)
+    @attendance1.order(:user_id, :worked_on)
+    @attendance2 = Attendance.where(instructor_confirmation: @user.id)
+    @attendance2.order(:user_id, :worked_on)
+
   end
   
   def create

@@ -28,3 +28,49 @@
   }
 
 }
+
+#table-application {
+  th {
+    background-color:#f4f9ff;
+    vertical-align: middle;
+    text-align: center;
+    
+  }
+  
+  th.table-padding {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    vertical-align: middle;
+  }
+  td {
+    background-color:#fdecec;
+    vertical-align: middle;
+    text-align: center;
+    border:solid, 1500px !important;
+  }  
+  
+  span {
+    border-right: none;
+  }
+}
+
+/* 上長に対する申請モーダル表題 */
+.title-font{
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+  margin-bottom: -10px;
+}
+
+/* 各社員の名前のmargin調整 */
+#name-title{
+  font-weight: bold;
+  margin-top: 50px;
+  font-size: 28px;
+}
+
+#name-title1{
+  font-weight: bold;
+  font-size: 28px;
+  
+}

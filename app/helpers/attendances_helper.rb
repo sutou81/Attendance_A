@@ -9,6 +9,13 @@ module AttendancesHelper
     # どれにも当てはまらなかった場合はfalseを返します。
     false
   end
+
+  # viewページでコントローラーに書くような事を避ける為のメッソド
+  def apply_to_superior(attendance, id)
+    o = attendance.where(user_id: id)
+    u = User.find(id)
+    return o, u
+  end
   
   
   

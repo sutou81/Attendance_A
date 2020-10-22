@@ -16,8 +16,15 @@
  .no-border {
   border: none;
 }
-
+/* 残業申請フォームのスタイル */
 .overwork-application-style {
+  padding: 15px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* 上長への申請の確認フォームのスタイル */
+.superior-approve-style{
   padding: 15px;
   text-align: center;
   vertical-align: middle;

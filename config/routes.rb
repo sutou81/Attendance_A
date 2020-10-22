@@ -25,6 +25,8 @@ Rails.application.routes.draw do
       member do 
         get 'edit_overwork_request'
         patch 'update_overwork_request'
+        get 'edit_superior_approve'
+        patch 'update_superior_approve'
       end
     end
   end

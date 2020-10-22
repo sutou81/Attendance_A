@@ -175,4 +175,48 @@ table, tr, th, td {
   display: block;
 }
 
+/* showページのテーブル調整 */
+.table-margin-top{
+  margin-top: 10px;
+}
+
+.link-bottom-margin{
+  margin-bottom:10px;
+}
+
+/* showページの上長に対する申請メッセージ装飾 */
+.notice-wording{
+  color: red;
+  font-size: 16px;
+  margin-bottom: 50px;
+}
+.notice-wording:hover{
+  color:palevioletred;
+  font-weight: bold;
+  
+  text-shadow    : 
+        2px  2px 1px gold,
+      -2px  2px 1px gold,
+        2px -2px 1px  gold,
+      -2px -2px 1px gold,
+        2px  0px 1px  gold,
+        0px  2px 1px gold,
+      -2px  0px 1px  gold,
+        0px -2px 1px gold;        /* 文字の影 */
+  
+  animation: example 5s linear;
+  height: 10px;
+  background: linear-gradient(to right, #f00 0%, #f80 14.28%, #dd0 28.56%, #0d0 42.85%, #0dd 57.14%, #00f 71.42%, #e0e 85.71%, #f00 100%) 0% center / 200% auto;
+    transition: all 5.0s
+}
+@keyframes example {
+  to { background-position-x: 200%; }
+
+ }
+
+.notice-nomber{
+  border: 3px solid red;
+  color: red;
+  font-weight: bold;
+}
 

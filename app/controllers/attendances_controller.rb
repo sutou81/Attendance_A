@@ -139,7 +139,36 @@ class AttendancesController < ApplicationController
     flash[:danger] = "未入力な項目があった為、申請をキャンセルしました。"
     redirect_to user_url(@user) and return
   end
+
   
+  # 上長各種承認モーダル
+  def edit_superior_approve
+    
+    @user = User.find(params[:user_id])
+    case params[:number]
+    when "1"
+
+    when "2"
+      @attendance1 = Attendance.where(oneday_instructor_confirmation: @user.id).order(:user_id, :worked_on)
+      @cou =0
+      @status = ["なし", "申請中", "承認", "否認"]
+      attendance = Attendance.where(oneday_instructor_confirmation: @user.id)
+      attendance.order(:user_id, :worked_on)
+      count = attendance.count
+      while count > 0
+        d = attendance[attendance.count-count].user_id
+        if count == attendance.count
+          @ary = []
+        end
+        if attendance[attendance.count-count].user_id != attendance[attendance.count-(count+1)].user_id
+          @ary.push(d)
+        end
+        count -= 1
+      end
+    when "3"
+
+    end
+  end
   
   private
     # 1ヶ月分の勤怠情報を扱います。勤怠11章テキスト説明あり
