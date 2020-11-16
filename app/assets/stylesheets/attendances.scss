@@ -65,7 +65,7 @@
 /* 各社員の名前のmargin調整 */
 #name-title{
   font-weight: bold;
-  margin-top: 50px;
+  margin-top: 30px;
   font-size: 28px;
 }
 
@@ -73,4 +73,10 @@
   font-weight: bold;
   font-size: 28px;
   
+}
+
+/* attendance_logフォームのスタイル */
+.log-style{
+  vertical-align: middle;
+  text-align: center;
 }

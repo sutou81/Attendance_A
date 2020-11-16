@@ -16,8 +16,8 @@
     <!-- headerの内容がこの１行で収まる -->
     <%= render 'layouts/header' %>
     
-    
-    <div class="container">
+    <!-- ↓containerからcontainer-fluidに変更につきcssで詳細指定、参照application.css -->
+    <div class="container-fluid">
       <% flash.each do |message_type, msg| %>
         <div class="alert alert-<%= message_type %>"><%= msg.html_safe %></div>
       <% end %>

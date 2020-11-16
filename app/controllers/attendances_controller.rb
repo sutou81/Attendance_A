@@ -10,13 +10,15 @@ class AttendancesController < ApplicationController
     @attendance = Attendance.find(params[:id])
     # 出勤時間が未登録であることを判定します。
     if @attendance.started_at.nil?
-      if @attendance.update_attributes(started_at: Time.current.change(sec: 0))
+      if @attendance.update_attributes(started_at: Time.current.change(sec: 0)) && @attendance.update_attributes(approved_started_at: Time.current.change(sec: 0))
         flash[:info] = "おはようございます！"
       else
+
+
         flash[:danger] = "勤怠登録に失敗しました。やり直してください。"
       end
     elsif @attendance.finished_at.nil?
-      if @attendance.update_attributes(finished_at: Time.current.change(sec: 0))
+      if @attendance.update_attributes(finished_at: Time.current.change(sec: 0)) && @attendance.update_attributes(approved_finished_at: Time.current.change(sec: 0))
         flash[:info] = "お疲れ様でした。"
       else
         flash[:danger] = "勤怠登録に失敗しました。やり直してください。"
@@ -56,7 +58,7 @@ class AttendancesController < ApplicationController
             if @attendance.oneday_instructor_confirmation.present? #@attendance.valid?(:update_one_month)
               @attendance.attendance_application_status = "#{@superior1.name}へ勤怠編集申請中"
               if params[:user][:attendances][id][:onday_check_box] == "1"
-                @attendance.attributes = {finished_at: @attendance.finished_at, onday_check_box: "1"}
+                @attendance.attributes = {finished_at: @attendance.finished_at, onday_check_box: "1", note: params[:user][:attendances][id][:note]}
                 count += 1 if @attendance.save!(context: :onday_check_box)
               else
                 count += 1 if @attendance.update_attributes!(item)
@@ -107,6 +109,7 @@ class AttendancesController < ApplicationController
     @user = User.find(@attendance.user_id)
     @superior = User.where(superior: true)
     
+    
   end
 
   # 残業申請モーダル更新
@@ -114,20 +117,28 @@ class AttendancesController < ApplicationController
     ActiveRecord::Base.transaction do # トランザクションを開始します。
       @attendance = Attendance.find(params[:id])
       @user =User.find(params[:user_id])
-      if params[:user][:attendances][:instructor_confirmation].present?
-        @superior = User.find(params[:user][:attendances][:instructor_confirmation])
+      id = params[:id]
+      if params[:user][:attendances][id][:instructor_confirmation].present?
+        @superior = User.find(params[:user][:attendances][id][:instructor_confirmation])
         @attendance.overtime_application_status = "#{@superior.name}へ残業申請中"
-        @attendance.instructor_confirmation = params[:user][:attendances][:instructor_confirmation]
+        params[:user][:attendances][id][:overtime_application_status] = "#{@superior.name}へ残業申請中"
+        @attendance.instructor_confirmation = params[:user][:attendances][id][:instructor_confirmation]
       end
-      unless params[:user][:attendances]["sceduled_end_time(4i)"].blank? || params[:user][:attendances]["sceduled_end_time(5i)"].blank?
-        @attendance.sceduled_end_time = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
+      unless params[:user][:attendances][id]["sceduled_end_time(4i)"].blank? || params[:user][:attendances][id]["sceduled_end_time(5i)"].blank?
+        @attendance.sceduled_end_time = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances][id]["sceduled_end_time(4i)"], params[:user][:attendances][id]["sceduled_end_time(5i)"])
+        params[:user][:attendances][id][:sceduled_end_time] = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances][id]["sceduled_end_time(4i)"], params[:user][:attendances][id]["sceduled_end_time(5i)"])
       end
       if @attendance.valid?(:update_overwork_request) && @attendance.valid?(:update_overwork_request1)
-        @attendance.update_attributes!(overwork_params)
-        m = Time.current
-        @attendance.sceduled_end_time = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
-        params[:user][:attendances][:sceduled_end_time] = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
-        @attendance.save!
+        overwork_params.each do |id, item|
+          @attendance1 = Attendance.find(id)
+          @attendance1.update_attributes!(item)
+        end
+        
+        @attendance.sceduled_end_time = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances][id]["sceduled_end_time(4i)"], params[:user][:attendances][id]["sceduled_end_time(5i)"])
+        #params[:user][:attendances][:sceduled_end_time] = Time.new(Time.current.year, Time.current.month, Time.current.day, params[:user][:attendances]["sceduled_end_time(4i)"], params[:user][:attendances]["sceduled_end_time(5i)"])
+        #  @attendance.business_content = params[:user][:attendances][id][:business_content]
+        #  @attendance.next_day = params[:user][:attendances][id][:next_day]
+        #@attendance.save!
       else
         @attendance.attributes = {instructor_confirmation: nil, sceduled_end_time: nil}
         @attendance.save!(context: :update_overwork_request)
@@ -141,44 +152,424 @@ class AttendancesController < ApplicationController
   end
 
   
-  # 上長各種承認モーダル
+  # 申請確認ボタンからの遷移モーダル
   def edit_superior_approve
-    
     @user = User.find(params[:user_id])
     case params[:number]
     when "1"
 
     when "2"
+      
       @attendance1 = Attendance.where(oneday_instructor_confirmation: @user.id).order(:user_id, :worked_on)
+      @i = 0
       @cou =0
-      @status = ["なし", "申請中", "承認", "否認"]
+      @nt = 0
+      @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
       attendance = Attendance.where(oneday_instructor_confirmation: @user.id)
-      attendance.order(:user_id, :worked_on)
-      count = attendance.count
-      while count > 0
-        d = attendance[attendance.count-count].user_id
-        if count == attendance.count
-          @ary = []
+      @superior = params[:user_id]
+      if attendance.blank? && @attendance1.blank?
+        # *@attendance4勤怠編集申請したものの中から、確認ボタンをおしたattendanceを特定し1件、取り出す
+        # 上の@attendance1は特定の上長宛てに勤怠編集申請して来たものを全て抽出
+        @users = User.find(params[:user_id]) # 勤怠を編集した人のUserモデルのデータが入ってる
+        @attendance4 = Attendance.find(params[:a_id])  # 勤怠編集申請したものの1件を特定する
+        @superior = params[:superior_id]
+        @number = params[:number]
+      else
+        attendance.order(:user_id, :worked_on)
+        count = attendance.count
+        while count > 0
+          d = attendance[attendance.count-count].user_id
+          if count == attendance.count
+            @ary = []
+          end
+          if attendance[attendance.count-count].user_id != attendance[attendance.count-(count+1)].user_id
+            @ary.push(d)
+          elsif d.present?
+            @ary.push(d)
+            @ary.uniq!
+          end
+          count -= 1
         end
-        if attendance[attendance.count-count].user_id != attendance[attendance.count-(count+1)].user_id
-          @ary.push(d)
-        end
-        count -= 1
       end
+      
+      
     when "3"
+      @attendance2 = Attendance.where(instructor_confirmation: @user.id).order(:user_id, :worked_on)
+      @cou1 =0
+      @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
+      attendance = Attendance.where(instructor_confirmation: @user.id)
+      @superior = params[:user_id]
+      if attendance.blank? && @attendance2.blank?
+        @users = User.find(params[:user_id]) # 勤怠を編集した人のUserモデルのデータが入ってる
+        @attendance5 = Attendance.find(params[:a_id]) 
+        @superior = params[:superior_id]
+      else
+        # 申請者のuser_idを配列にしてる
+        attendance.order(:user_id, :worked_on)
+        count = attendance.count
+        while count > 0
+          d = attendance[attendance.count-count].user_id
+          if count == attendance.count
+            @ary = []
 
+          end
+
+          if attendance[attendance.count-count].user_id != attendance[attendance.count-(count+1)].user_id
+            @ary.push(d)
+          elsif d.present?
+            @ary.push(d)
+            @ary.uniq!
+          end
+          count -= 1
+        end
+      end
     end
   end
-  
+
+  # 確認ボタン1件のみの更新・各申請を申請中から変更した場合ここで更新する
+  def update_superior_approve
+    debugger 
+    @superior = params[:superior_id]
+    if params[:attendance][:status] != "2" && params[:attendance][:change] == "1"
+      case params[:number]
+      when "1"
+      when "2"
+        debugger
+        attendance = Attendance.find(params[:attendance_id])
+        a = params[:attendance][:status].to_i
+        if a == 1
+            attendance.started_at = nil
+            attendance.finished_at = nil
+            attendance.onday_check_box = nil
+            attendance.attendance_application_status = nil
+            attendance.oneday_instructor_confirmation = nil
+            attendance.note = nil
+            attendance.save
+            flash[:success] = "勤怠編集を'なし'にしました"
+            redirect_to user_path(@superior)
+        elsif a == 3
+          debugger
+          attendance.approved_started_at = attendance.started_at
+          attendance.approved_finished_at = attendance.finished_at
+          if (attendance.first_approved_started_at && attendance.first_approved_finished_at) == nil
+            if attendance.approved_started_at_in_database != nil && attendance.approved_finished_at_in_database != nil
+              attendance.first_approved_started_at = attendance.approved_started_at
+              attendance.first_approved_finished_at = attendance.approved_finished_at
+            end
+          end
+          attendance.approved_update_time = Time.current
+          debugger
+          attendance.approved_note = attendance.note
+          attendance.attendance_application_status = "勤怠編集承認済み"
+          attendance.save
+          flash[:success] = "勤怠編集を'承認'しました"
+          redirect_to user_path(@superior)
+        elsif a == 4
+          attendance.attendance_application_status = "勤怠編集否認"
+          attendance.save
+          flash[:success] = "勤怠編集を'否認'しました"
+          redirect_to user_path(@superior)
+        end
+      when "3"
+        if a == 1
+          attendance.sceduled_end_time = nil
+          attendance.next_day = nil
+          attendance.business_content = nil
+          attendance.instructor_confirmation = nil
+          attendance.overtime_application_status = nil
+          attendance.save
+          flash[:success] = "残業申請を'なし'にしました"
+          redirect_to user_path(@superior)
+        elsif a == 3
+          attendance.approved_sceduled_end_time = attendance.sceduled_end_time
+          attendance.approved_business_content = attendance.business_content
+          attendance.overtime_application_status = "残業申請承認済み"
+          attendance.save
+          flash[:success] = "残業申請を'承認'しました"
+          redirect_to user_path(@superior)
+        elsif a == 4
+          attendance.overtime_application_status = "残業申請否認"
+          attendance.save
+          flash[:success] = "残業申請を'否認'しました"
+          redirect_to user_path(@superior)
+        end
+      end
+    elsif params[:attendance][:change] == "0"
+      flash[:danger] = "変更欄にチェックを入れてください。"
+      redirect_to user_path(@superior)
+    elsif params[:attendance][:status] == "2" && params[:attendance][:change] == "1"
+      flash[:danger] = "指示確認㊞を'申請中'以外を選択してください"
+      redirect_to user_path(@superior)
+    end
+  end
+
+  def new_edit_superior_approve
+    @user = User.find(params[:id])
+    case params[:number]
+    when "1"
+      @attendance = Attendance.where(onemonth_instructor_confirmation: @user.id).order(:user_id, :worked_on)
+      @attendance = @attendance.where("onemonth_application_status LIKE ?", "%申請中%")
+      @cou1 =0
+      @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
+      attendance = Attendance.where(onemonth_instructor_confirmation: @user.id)
+      attendance = attendance.where("onemonth_application_status LIKE ?", "%申請中%")
+      @superior = params[:user_id]
+      if attendance.blank? && @attendance.blank?
+        @users = User.find(params[:user_id]) # 1ヶ月勤怠申請した人のUserモデルのデータが入ってる
+        @attendance5 = Attendance.find(params[:a_id]) 
+        @superior = params[:superior_id]
+      else
+        # 申請者のuser_idを配列にしてる
+        attendance.order(:user_id, :worked_on)
+        count = attendance.count
+        while count > 0
+          d = attendance[attendance.count-count].user_id
+          if count == attendance.count
+            @ary = []
+
+          end
+
+          if attendance[attendance.count-count].user_id != attendance[attendance.count-(count+1)].user_id
+            @ary.push(d)
+            @ary.uniq!
+          elsif d.present?
+            @ary.push(d)
+            @ary.uniq!
+          end
+          count -= 1
+        end
+        debugger
+      end
+    when "2"
+      @attendance1 = Attendance.where(oneday_instructor_confirmation: @user.id).order(:user_id, :worked_on)
+      @attendance1 = @attendance1.where("attendance_application_status LIKE ?", "%申請中%")
+      @i = 1
+      @cou =0
+      @nt = 0
+      @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
+      attendance = Attendance.where(oneday_instructor_confirmation: @user.id)
+      attendance = attendance.where("attendance_application_status LIKE ?", "%申請中%")
+      @superior = params[:id]
+      if attendance.blank? && @attendance1.blank?
+        # *@attendance4勤怠編集申請したものの中から、確認ボタンをおしたattendanceを特定し1件、取り出す
+        # 上の@attendance1は特定の上長宛てに勤怠編集申請して来たものを全て抽出
+        @users = User.find(params[:user_id]) # 勤怠を編集した人のUserモデルのデータが入ってる
+        @attendance4 = Attendance.find(params[:a_id])  # 勤怠編集申請したものの1件を特定する
+        @superior = params[:superior_id]
+      else
+        attendance.order(:user_id, :worked_on)
+        count = attendance.count
+        while count > 0
+          d = attendance[attendance.count-count].user_id
+          if count == attendance.count
+            @ary = []
+          end
+          if attendance[attendance.count-count].user_id != attendance[attendance.count-(count+1)].user_id
+            @ary.push(d)
+          elsif d.present?
+            @ary.push(d)
+            @ary.uniq!
+          end
+          count -= 1
+        end
+      end
+      
+      
+    when "3"
+      @attendance2 = Attendance.where(instructor_confirmation: @user.id).order(:user_id, :worked_on)
+      @attendance2 = @attendance2.where("overtime_application_status LIKE ?", "%申請中%")
+      @cou1 =0
+      @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
+      attendance = Attendance.where(instructor_confirmation: @user.id)
+      attendance = attendance.where("overtime_application_status LIKE ?", "%申請中%")
+      @superior = params[:user_id]
+      if attendance.blank? && @attendance2.blank?
+        @users = User.find(params[:user_id]) # 勤怠を編集した人のUserモデルのデータが入ってる
+        @attendance5 = Attendance.find(params[:a_id]) 
+        @superior = params[:superior_id]
+      else
+        # 申請者のuser_idを配列にしてる
+        attendance.order(:user_id, :worked_on)
+        count = attendance.count
+        while count > 0
+          d = attendance[attendance.count-count].user_id
+          if count == attendance.count
+            @ary = []
+
+          end
+
+          if attendance[attendance.count-count].user_id != attendance[attendance.count-(count+1)].user_id
+            @ary.push(d)
+            @ary.uniq!
+          elsif d.present?
+            @ary.push(d)
+            @ary.uniq!
+          end
+          count -= 1
+        end
+      end
+    end
+  end
+
+  # 上長からの指示を受けて複数の勤怠編集申請や残業申請の更新
+  def new_update_superior_approve
+    @user = User.find(params[:id])
+    ary = []
+    i = 0
+    k = 0
+    n = 0
+    m = 0
+    l = 0
+    params[:user][:attendances].each do |id, item|
+      ary.push([id.to_i,item[:status].to_i, item[:changes].to_i])
+    end
+    ary.count
+    ary.each do |a|
+      if a[2] == 0
+        i = i + 1
+      end
+      if a[1] == 2
+        k = k + 1
+      end
+    end
+    if ary.count == i
+      flash[:danger] = "変更対象のレコードにチェックを入れてください。"
+      redirect_to user_path(@user)
+    elsif ary.count == k
+      flash[:danger] = "変更対象の指示者確認㊞を'申請中'以外を選択してください。"
+      redirect_to user_path(@user)
+    else
+      # ↓ 指示確認印が'申請中'または変更チェックボタンがないものを取り除く
+      ary.delete_if{ |a|
+        a[1] == 2 || a[2] == 0
+      }
+      case params[:number]
+      when "1" # 1か月の勤怠申請関連
+
+      when "2" # 勤怠編集申請関連
+        # ↓ 指示確認印が'申請中'または変更チェックボタンがないものを取り除く
+        ary.delete_if{ |a|
+          a[1] == 2 || a[2] == 0
+        }
+        # 申請の更新の分岐
+        ary.each do |a|
+          attendance = Attendance.find(a[0]) # ここで申請してきたユーザーを特定する。
+          if a[1] == 1
+            attendance.started_at = nil
+            attendance.finished_at = nil
+            attendance.onday_check_box = nil
+            attendance.attendance_application_status = nil
+            attendance.oneday_instructor_confirmation = nil
+            attendance.note = nil
+            attendance.save
+            l += 1
+          elsif a[1] == 3
+            attendance.approved_started_at = attendance.started_at
+            attendance.approved_finished_at = attendance.finished_at
+            if (attendance.first_approved_started_at && attendance.first_approved_finished_at) == nil
+              if attendance.approved_started_at_in_database != nil && attendance.approved_finished_at_in_database != nil
+                attendance.first_approved_started_at = attendance.approved_started_at
+                attendance.first_approved_finished_at = attendance.approved_finished_at
+              end
+            end
+            attendance.approved_update_time = Time.current
+            debugger
+            attendance.approved_note = attendance.note
+            attendance.attendance_application_status = "勤怠編集承認済み"
+            attendance.save
+            m += 1
+
+          elsif a[1] == 4
+            attendance.attendance_application_status = "勤怠編集否認"
+            attendance.save
+            n += 1
+ 
+          end
+        end
+        flash[:success] = "勤怠編集申請を 承認: #{m}件、否認: #{n}件、なし: #{l}件 しました。"
+        redirect_to user_path(@user)
+
+      when "3" # 残業申請関連
+        debugger
+        ary.each do |a|
+          attendance = Attendance.find(a[0]) # ここで申請してきたユーザーを特定する
+          if a[1] == 1
+            attendance.sceduled_end_time = nil
+            attendance.next_day = nil
+            attendance.business_content = nil
+            attendance.instructor_confirmation = nil
+            attendance.overtime_application_status = nil
+            attendance.save
+            l += 1
+          elsif a[1] == 3
+            attendance.approved_sceduled_end_time = attendance.sceduled_end_time
+            attendance.approved_business_content = attendance.business_content
+            attendance.overtime_application_status = "残業申請承認済み"
+            attendance.save
+            m += 1
+          elsif a[1] == 4
+            attendance.overtime_application_status = "残業申請否認"
+            attendance.save
+            n += 1
+          end
+        end
+        flash[:success] = "残業申請を 承認: #{m}件、否認: #{n}件、なし: #{l}件 しました。"
+        redirect_to user_path(@user)
+      end
+
+    end
+
+  end
+
+  # 勤怠変更ログ
+  def attendance_log
+    @year = {"年": 1, "2015": 2, "2016": 3, "2017": 4, "2018": 5, "2019": 6, "2020": 7, "2021": 8, "2022": 9, "2023": 10, "2024": 11, "2025": 12, }
+    @year_select = 1
+    @month = {"月": 1, "1": 2, "2": 3,"4": 5, "5": 6, "6": 7, "7": 8, "8": 9, "9": 10, "10": 11, "11": 12, "12": 13 }
+    @month_select = 1
+
+  end
+
+  # 1ヶ月申請をする
+  def update_month_approval
+    debugger
+    @user = User.find(params[:user_id])
+    if params[:attendance][:onemonth_instructor_confirmation].present?
+      @user = User.find(params[:user_id])
+      @superior = User.find(params[:attendance][:onemonth_instructor_confirmation])
+      @attendance = Attendance.find(params[:id])
+      @attendance.onemonth_application_status = "所属長承認： #{@superior.name}に申請中"
+      status = "所属長承認： #{@superior.name}に申請中"
+      month_superior_params[:onemonth_application_status] = "所属長承認： #{@superior.name}に申請中"
+      debugger
+      if @attendance.update_attributes(month_superior_params)
+        debugger
+        flash[:success] = "#{@superior.name}に1ヶ月分の勤怠を申請しました"
+        redirect_to user_url(@user)
+      else
+        flash[:success] = "1ヶ月分の勤怠申請に失敗しました"
+        redirect_to user_url(@user)
+      end
+    else
+      debugger
+      flash[:danger] = "申請先の上長を選択してください"
+      redirect_to user_url(@user)
+    end
+  end
   private
     # 1ヶ月分の勤怠情報を扱います。勤怠11章テキスト説明あり
     def attendances_params
-      params.require(:user).permit(attendances: [:started_at, :finished_at, :note, :oneday_instructor_confirmation, :attendance_application_status, :onday_check_box])[:attendances]
+      params.require(:user).permit(attendances: [:started_at, :finished_at, :note, :oneday_instructor_confirmation, :attendance_application_status, :onday_check_box, :id])[:attendances]
     end
 
     # 残業情報を扱う
     def overwork_params
       params.require(:user).permit(attendances: [:sceduled_end_time, :next_day, :business_content, :instructor_confirmation, :overtime_application_status])[:attendances]
+    end
+
+    # 上長へ1ヶ月の勤怠承認申請
+    def month_superior_params
+      params.require(:attendance).permit(:onemonth_instructor_confirmation).merge(onemonth_application_status: @attendance.onemonth_application_status)
     end
   
   # beforeフィルター

@@ -30,9 +30,13 @@
               <% if (Date.current < day.worked_on) %>
                 <td><%= attendance.time_field :started_at, readonly: true, class:"form-control", id: "sample#{cou}" %></td>
                 <td><%= attendance.time_field :finished_at, readonly: true, class:"form-control", id: "example#{cou}",:onChange=>"javascript: func1();" %></td>
-              <% else %>
+              <% elsif (Date.current == day.worked_on) &&  day.finished_at.nil? %>
+                <% day.started_at = nil %>
                 <td><%= attendance.time_field :started_at, class:"form-control", id: "sample#{cou}" %></td>
                 <td><%= attendance.time_field :finished_at, class:"form-control", id: "example#{cou}",:onChange=>"javascript: func1();" %></td>
+              <% else %>
+                <td><%= attendance.time_field :started_at, class:"form-control", id: "sample#{cou}" %></td>
+                <td><%= attendance.time_field :finished_at, class:"form-control", id: "example#{cou}"%></td>
               <% end %> 
               <td><%= attendance.check_box :onday_check_box, id: "onday_check_box#{cou}",:onChange=>"javascript: func3();" %></td>
               <td>

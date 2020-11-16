@@ -86,7 +86,7 @@ module SessionsHelper
   # 一般ユーザーがUrlを打ち込んで、他のユーザーの勤怠ページにアクセスするのを制限
   def show_access_limit
     @user = User.find(params[:id])
-    if !current_user.admin?
+    if !current_user.admin? && !current_user.superior?
       unless @user == current_user
         flash[:danger] = "閲覧権限がありません。"
         redirect_to(root_url) 
@@ -128,5 +128,13 @@ module SessionsHelper
         errors.add(:finished_at, "が必要です")
       end
     
+  end
+
+  # 他のユーザーのshowページを上長が見た際の調整に必要→各お知らせを表示させない為のもの
+  # 表示しているshowページが現在ログインしてるユーザー(上長のページ)と同じものか判断
+  # showページ内で使用してる
+  def correct_user_show
+    @user = User.find(params[:id])
+    @user == current_user
   end
 end

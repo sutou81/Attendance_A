@@ -19,12 +19,42 @@ class UsersController < ApplicationController
   # 1ヶ月分の勤怠データの中で、出勤時間が何も無い状態では無いものの数を代入
   # @attendancesはbefore_actionのset_one_month内で指定してあるから使える
   def show
+    @one_month_approval = @user.attendances.find_by(worked_on: @last_day) # 1ヶ月の最後の日を特定
+    @approval = @one_month_approval.onemonth_application_status
+    @bunkatu = @approval.split(/\A(.{1,6})/,2)
+    @bun = @bunkatu[1]
+    @katu = @bunkatu[2]
     @worked_sum = @attendances.where.not(started_at: nil).count
+    @attendance = Attendance.where(onemonth_instructor_confirmation: @user.id)
+    @attendance = @attendance.where("onemonth_application_status LIKE ?", "%申請中%")
+    @attendance.order(:user_id, :worked_on)
     @attendance1 = Attendance.where(oneday_instructor_confirmation: @user.id)
+    @attendance1 = @attendance1.where("attendance_application_status LIKE ?", "%申請中%")
     @attendance1.order(:user_id, :worked_on)
     @attendance2 = Attendance.where(instructor_confirmation: @user.id)
+    @attendance2 = @attendance2.where("overtime_application_status LIKE ?", "%申請中%")
     @attendance2.order(:user_id, :worked_on)
-
+    @superior = User.where(superior: true)
+    if params[:id].present?
+      @specific = params[:attendance_id]
+    end
+    if params[:superior_id].present?
+      @superior = params[:superior_id]
+    end
+    if params[:id].present?
+      @users = User.find(params[:id])
+    end
+    case params[:number]
+    when "1"
+    when "2"
+      @btn_name = "勤怠変更の承認"
+      @attendance_i = @specific
+      @number_i = 2
+    when "3" 
+      @btn_name = "残業申請の承認"
+      @attendance_i = @specific
+      @number_i = 3
+    end
   end
   
   def create
@@ -102,6 +132,36 @@ class UsersController < ApplicationController
    redirect_to users_url
   end
   
+  # 勤怠変更ログ
+  def attendance_log
+    @user = User.find(params[:id])
+    @reset = DateTime.new(Time.current.year, Time.current.month, 1)
+    if params[:date]
+      date = params[:date].to_date # 日付形式にしてる
+      @years = date.year
+      @months = date.month
+    else
+      date = DateTime.new(params[:user][:year].to_i, params[:user][:month].to_i-1, 1) #ajaxで送られてきた物を日付に加工
+      @years = date.year
+      @months = date.month
+    end
+    @attendance = @user.attendances
+    @attendance = @attendance.where.not(approved_started_at: nil)
+    if params[:date]
+      search = params[:date].to_date
+    else
+      search = date.to_date
+    end
+    @search = @attendance.where(worked_on: search.beginning_of_month..search.end_of_month) # selectで選択された年月の承認ログを抽出
+    @year = {" 年 ": 1, "2015": 2015, "2016": 2016, "2017": 2017, "2018": 2018, "2019": 2019, "2020": 2020, "2021": 2021, "2022": 2022, "2023": 2023, "2024": 2024, "2025": 2025 }
+    @year_select = 1
+    @month = {" 月 ": 1, "1": 2, "2": 3,"4": 5, "5": 6, "6": 7, "7": 8, "8": 9, "9": 10, "10": 11, "11": 12, "12": 13 }
+    @month_select = 1
+    if params[:year]
+      debugger
+      render :attendance_log
+    end
+  end
   
   private
   

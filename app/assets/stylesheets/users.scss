@@ -207,7 +207,7 @@ table, tr, th, td {
   animation: example 5s linear;
   height: 10px;
   background: linear-gradient(to right, #f00 0%, #f80 14.28%, #dd0 28.56%, #0d0 42.85%, #0dd 57.14%, #00f 71.42%, #e0e 85.71%, #f00 100%) 0% center / 200% auto;
-    transition: all 5.0s
+    transition: all 10.0s
 }
 @keyframes example {
   to { background-position-x: 200%; }
@@ -220,3 +220,39 @@ table, tr, th, td {
   font-weight: bold;
 }
 
+/* ログテーブルのスタイル */
+.log-table{
+  margin-top: 50px;
+  th {
+    text-align: center; 
+    vertical-align: middle;
+  }
+  td {
+    text-align: center;
+    vertical-align: middle;
+  }  
+}
+
+/* 承認ログのリセットボタン装飾 */
+.btn-primary1 {
+  background-color: #fff;
+  color: darkblue;
+  border-width:3px;
+  border-color: red;
+  
+   
+}
+.btn-primary1:hover {
+  font-weight: bold;
+  font-size:15px;
+  border-width:3px;
+  border-color:darkblue;
+  animation: example 5s linear;
+  background: linear-gradient(to right, #f00 0%, #f80 14.28%, #dd0 28.56%, #0d0 42.85%, #0dd 57.14%, #00f 71.42%, #e0e 85.71%, #f00 100%) 0% center / 200% auto;
+    transition: all 10.0s
+}
+@keyframes example {
+  to { background-position-x: 200%; }
+
+ 
+}

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_12_000016) do
+ActiveRecord::Schema.define(version: 2020_11_15_081501) do
 
   create_table "attendances", force: :cascade do |t|
     t.date "worked_on"
@@ -27,8 +27,17 @@ ActiveRecord::Schema.define(version: 2020_10_12_000016) do
     t.string "overtime_application_status"
     t.string "attendance_application_status"
     t.string "oneday_instructor_confirmation"
-    t.string "oneday_next_day"
     t.string "onday_check_box"
+    t.datetime "approved_started_at"
+    t.datetime "approved_finished_at"
+    t.datetime "approved_sceduled_end_time"
+    t.string "approved_business_content"
+    t.string "approved_note"
+    t.datetime "first_approved_started_at"
+    t.datetime "first_approved_finished_at"
+    t.datetime "approved_update_time"
+    t.string "onemonth_instructor_confirmation"
+    t.string "onemonth_application_status", default: "所属長承認： 未申請"
     t.index ["user_id"], name: "index_attendances_on_user_id"
   end
 
@@ -39,16 +48,16 @@ ActiveRecord::Schema.define(version: 2020_10_12_000016) do
     t.datetime "updated_at", null: false
     t.string "password_digest"
     t.string "department"
-    t.datetime "basic_time", default: "2020-10-10 23:00:00"
-    t.datetime "work_time", default: "2020-10-10 22:30:00"
+    t.datetime "basic_time", default: "2020-11-15 23:00:00"
+    t.datetime "work_time", default: "2020-11-15 22:30:00"
     t.string "remember_digest"
     t.boolean "admin", default: false
     t.string "affiliation"
     t.integer "employee_number"
     t.string "uid"
-    t.datetime "basic_work_time", default: "2020-10-10 23:00:00"
-    t.datetime "designated_work_start_time", default: "2020-10-10 23:30:00"
-    t.datetime "designated_work_end_time", default: "2020-10-11 08:30:00"
+    t.datetime "basic_work_time", default: "2020-11-15 23:00:00"
+    t.datetime "designated_work_start_time", default: "2020-11-15 23:30:00"
+    t.datetime "designated_work_end_time", default: "2020-11-16 08:30:00"
     t.boolean "superior", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end

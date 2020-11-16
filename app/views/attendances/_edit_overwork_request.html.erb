@@ -12,6 +12,17 @@
         <div class="row">
           <div class="col-md-12  overwork-application-style">
             <h4 class="modal-title">【残業申請】</h4>
+            <div style="color: red; font-size:12px;">
+              <% if @search.present? %>
+                <span>下記の事項に注意して残業申請してください</span><br>
+                <span><span style="font-weight: bold;">勤怠編集申請中</span> 出社時間：<%= l(@attendance.started_at, format: :time) %>, 退社時間：
+                <% if @attendance.next_day == "1" %><span style="color: red; font-size:8px;">(翌)</span><% end %><%= l(@attendance.finished_at, format: :time) %>があります。</span>
+              <% elsif @attendance.approved_finished_at.present? %>
+                <span>下記の事項に注意して残業申請してください</span><br>
+                <span><span style="font-weight: bold;">勤怠編集承認済みの</span> 出社時間：<%= l(@attendance.approved_started_at, format: :time) %>, 退社時間：
+                <% if @attendance.next_day == "1" %><span style="color: red; font-size:8px;">(翌)</span><% end %><%= l(@attendance.approved_finished_at, format: :time) %>があります。</span>
+              <% end %>
+            </div>
             <%= form_with(model: @user, url: update_overwork_request_user_attendance_path(@user, @attendance), local: true, method: :patch) do |f| %>
               <%= render 'shared/error_messages', object: @user %>
               <table class="table table-bordered  table-hover table-striped text" >
@@ -21,12 +32,12 @@
                   <th>曜日</th>
                   <th>終了予定時間</th>
                   <th>翌日</th>
-                  <th>業務内容</th>
+                  <th>業務処理内容</th>
                   <th>指示確認㊞</th>
                 </tr>
               </thead>
               <tbody>
-                <%= f.fields_for :attendances, @attendance do |attendance| %>
+                <%= f.fields_for "attendances[]", @attendance do |attendance| %>
                   <%= render 'shared/error_messages', object: @attendance %>
                 
                   <tr>

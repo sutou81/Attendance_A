@@ -19,6 +19,10 @@ Rails.application.routes.draw do
       patch 'attendances/update_overwork_request' # 残業申請に関する追加
       get 'attendances/edit_one_month' # この行が追加対象です。
       patch 'attendances/update_one_month' # この行が追加対象です。
+      get 'attendances/new_edit_superior_approve' # この行が追加対象です。
+      patch 'attendances/new_update_superior_approve' # この行が追加対象です。
+      get 'attendance_log'
+      patch 'update_month_approval'
     end
     collection { post :import } 
     resources :attendances do
@@ -27,6 +31,7 @@ Rails.application.routes.draw do
         patch 'update_overwork_request'
         get 'edit_superior_approve'
         patch 'update_superior_approve'
+        patch 'update_month_approval'
       end
     end
   end

@@ -36,3 +36,10 @@
   width: auto !important;
 }
 
+/* container から変更につき調整 */
+.container-fluid {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: 120px;
+  margin-left: 120px;
+}

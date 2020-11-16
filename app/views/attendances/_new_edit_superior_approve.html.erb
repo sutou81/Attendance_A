@@ -1,0 +1,502 @@
+<% provide(:class_text, 'basic-info') %>
+<% provide(:button_text, '変更を送信する') %>
+<% if @attendance.present? %>
+  <div class="container">
+    <div class="modal-dialog modal-lg modal-dialog-center">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h2 class="title-font">1ヶ月分の勤怠申請お知らせ</h2>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12  superior-approve-style">
+              <%= form_with(model:@user, url: attendances_new_update_superior_approve_user_path(@user, number:1), local: true, method: :patch) do |f| %>
+                <%= render 'shared/error_messages', object: @user %>
+                <% @ary.each do |a| %>
+                  <% only, users = apply_to_superior(@attendance, a) %>
+                    <% if @cou == 0 %>
+                      <h4 class="modal-title" id="name-title1">【<%= users.name %>から1ヶ月分の勤怠申請】</h4>
+                    <% else %>
+                      <h4 class="modal-title name-title" id="name-title">【<%= users.name %>から1ヶ月分の勤怠申請】</h4>
+                    <% end %>
+                  
+                  <table class="table table-bordered  table-hover table-striped text" id="table-application" >
+                    <thead>
+                      <tr>
+                        <th>月</th>
+                        <th>指示者確認㊞</th>
+                        <th>変更</th>
+                        <th>勤怠を確認する</th>
+                      </tr>
+                    </thead>
+                    <% only.each do |one| %>
+                      <%= f.fields_for "attendances[]", one do |attendance| %>
+                        <tr>
+                          <td><%= l(one.worked_on, format: :month) %></td>
+                          
+                          
+                          
+                          <td><%= attendance.select :status, @status, {selected: 2}, class:"form-control" %></td>
+                          <td><%= attendance.check_box :changes, {}, one.user_id, nil %></td>
+                          <td><%= link_to "確認", user_path( users, superior_id: @superior, attendance_id:one.id, number:1, date: one.worked_on.beginning_of_month), target: :_blank, class:"btn btn-primary" %></td>
+
+                        </tr>
+                      <% end %>
+                    <% end %>
+
+                  </table>
+                  <% @cou1 = @cou1 +1 %>
+                <% end %>
+                <%= f.submit "変更を申請する", class: "btn btn-primary form-control" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+
+<!-- 勤怠編集モーダル複数件 -->
+<% if @attendance1.present? %>
+  <div class="container">
+    <div class="modal-dialog modal-lg modal-dialog-center">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h2 class="title-font">勤怠編集申請のお知らせ</h2>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12   superior-approve-style"> 
+              <%= form_with(model:@user, url: attendances_new_update_superior_approve_user_path(@user, number:2), local: true, method: :patch) do |f| %>
+                <%= render 'shared/error_messages', object: @user %>
+                  <!-- ↓独自のメソッドを使い、引数に➀特定の上長に送られてきたもの、➁＠aryの中にユーザーIDの配列が入ってる中から
+                  1件ずつ取り出し 渡す
+                  各ユーザーごとに勤怠編集申請を振り分ける only→特定のユーザーの申請をまとめたもの 
+                  users→ 申請者の特定-->
+                <% @ary.each do |a| %>
+                  <% only, users = apply_to_superior(@attendance1, a) %>
+                  <%= render 'shared/error_messages', object: @user %>
+
+                  <% if @cou == 0 %>
+                    <h4 class="modal-title" id="name-title1">【<%= users.name %>からの勤怠編集申請】</h4>
+                  <% else %>
+                    <h4 class="modal-title name-title" id="name-title">【<%= users.name %>からの勤怠編集申請】</h4>
+                  <% end %>
+                    
+                  <table class="table table-bordered  table-hover table-striped text" id="table-application" >
+                    <thead>
+                      <tr>
+                        <th rowspan="3"><span class="align-middle">日付</span></th>
+                        <th rowspan="3">曜日</th>
+                        <th colspan="4">変更前</th>
+                        <th colspan="4">変更後</th>
+                        <th rowspan="3">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;備考&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&thinsp;</th>
+                        <th rowspan="3">指示確認㊞</th>
+                        <th rowspan="3">変更</th>
+                        <th rowspan="3">勤怠を確認する</th>
+                      </tr>
+                      <tr>
+                        <th colspan="2">出社</th>
+                        <th colspan="2">退社</th>
+                        <th colspan="2">出社</th>
+                        <th colspan="2">退社</th>
+                      </tr>
+                      <tr>
+                        <th>時</th>
+                        <th>分</th>
+                        <th>時</th>
+                        <th>分</th>
+                        <th>時</th>
+                        <th>分</th>
+                        <th>時</th>
+                        <th>分</th>
+                      </tr>
+                    </thead>
+                    <% only.each do |one| %>
+                      <%= f.fields_for "attendances[]", one do |attendance| %>
+            
+                        <tr>
+                          <td><%= l(one.worked_on, format: :short) %></td>
+                          <% if one.worked_on.wday == 6
+                              x = "sat"
+                            elsif one.worked_on.wday == 0
+                              x = "sun"
+                            end %>
+                          <td class="<%= x %>"><%= $days_of_the_week[one.worked_on.wday] %></td>
+                          <!-- started_at変更前の値があれば、'時'の部分を表示  -->
+                          <% if one.approved_started_at_before_last_save.present? %>
+                            <td><%= l(one.approved_started_at_before_last_save, format: :time1) %></td>
+                          <% elsif one.approved_started_at.present? %>
+                            <td><%= l(one.approved_started_at, format: :time1) %></td>
+                          <% else %>
+                            <td></td>
+                          <% end %>
+
+                          <!-- started_at変更前の値があれば、'分'の部分を表示  -->
+                          <% if one.approved_started_at_before_last_save.present? %>
+                            <td><%= l(one.approved_started_at_before_last_save.floor_to(15.minutes), format: :time2) %></td>
+                          <% elsif one.approved_started_at.present? %>
+                            <td><%= l(one.approved_started_at.floor_to(15.minutes), format: :time2) %></td>
+                          <% else %>
+                            <td></td>
+                          <% end %>
+
+                          <!-- finished_at変更前の値があれば、'時'の部分を表示  -->
+                          <% if one.approved_finished_at_before_last_save.present? %>
+                            <% if one.approved_started_at_before_last_save.day != one.approved_finished_at_before_last_save.day %>
+                              <td><span style="color: red; font-size:8px;">(翌)</span><td><%= l(one.approved_finished_at_before_last_save, format: :time1) %></td>
+                            <% else %>
+                              <td><%= l(one.approved_finished_at_before_last_save, format: :time1) %></td>
+                            <% end %>
+                          <% elsif one.approved_finished_at.present? %>
+                            <% if one.approved_started_at.day != one.approved_finished_at.day %>
+                              <td><span style="color: red; font-size:8px;">(翌)</span><td><%= l(one.approved_finished_at, format: :time1) %></td>
+                            <% else %>
+                              <td><%= l(one.approved_finished_at, format: :time1) %></td>
+                            <% end %>  
+                          <% else %>
+                            <td></td>
+                          <% end %>
+
+                          <!-- finished_at変更前の値があれば、'分'の部分を表示  -->
+                          <% if one.approved_finished_at_before_last_save.present? %>
+                            <td><%= l(one.approved_finished_at_before_last_save.floor_to(15.minutes), format: :time2) %></td>
+                          <% elsif one.approved_finished_at.present? %>
+                            <td><%= l(one.approved_finished_at.floor_to(15.minutes), format: :time2) %></td>
+                          <% else %>
+                            <td></td>
+                          <% end %>
+
+                          <!-- 現在申請してるstarted_atの、'時'の部分を表示 -->
+                          <td><%= l(one.started_at, format: :time1) %></td>
+                          
+
+                          <!-- 現在申請してるstarted_atの、'分'の部分を表示 -->
+                          <td><%= l(one.started_at.floor_to(15.minutes), format: :time2) %></td>
+
+                          <!-- 現在申請してるfinished_atの、'時'の部分を表示 -->
+                          <% if one.started_at.day != one.finished_at.day %>
+                            <td><span style="color: red; font-size:8px;">(翌)</span><%= l(one.finished_at, format: :time1) %></td>  
+                          <% else %>
+                            <td><%= l(one.finished_at, format: :time1) %></td>
+                          <% end %>
+
+                          <!-- 現在申請してるfinished_atの、'分'の部分を表示 -->
+                          <td><%= l(one.finished_at.floor_to(15.minutes), format: :time2) %></td>
+
+                          <td><%= one.note %></td>
+                          <td><%= attendance.select :status, @status, {selected: 2}  %></td>
+                          <td><%= attendance.check_box :changes, {}, one.user_id, nil %></td>
+                          <td><%= link_to "確認", user_path( users, superior_id: @superior, attendance_id:one.id, number:2, date: one.worked_on.beginning_of_month), target: :_blank, class:"btn btn-primary" %></td>
+
+                        </tr> 
+                        
+                      <% end %>
+                    <% end %>
+                  </table>
+                  <%@cou = @cou +1%> 
+                <% end %>
+                <% @i = @i +1 %>
+                <%= f.submit "変更を申請する", class: "btn btn-primary form-control" %>
+              <% end %>   
+            </div>
+          </div>
+        </div>  
+      </div>
+    </div>
+  </div>
+<% end %>
+<!-- 残業モーダル部分複数件 -->
+<% if @attendance2.present? %>
+  <div class="container">
+    <div class="modal-dialog modal-lg modal-dialog-center">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h2 class="title-font">残業申請のお知らせ</h2>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12  superior-approve-style">
+              <%= form_with(model:@user, url: attendances_new_update_superior_approve_user_path(@user, number:3), local: true, method: :patch) do |f| %>
+                <%= render 'shared/error_messages', object: @user %>
+                <% @ary.each do |a| %>
+                  <% only, users = apply_to_superior(@attendance2, a) %>
+                    <% if @cou == 0 %>
+                      <h4 class="modal-title" id="name-title1">【<%= users.name %>からの残業申請】</h4>
+                    <% else %>
+                      <h4 class="modal-title name-title" id="name-title">【<%= users.name %>からの残業申請】</h4>
+                    <% end %>
+                  
+                  <table class="table table-bordered  table-hover table-striped text" id="table-application" >
+                    <thead>
+                      <tr>
+                        <th><span class="align-middle">日付</span></th>
+                        <th>曜日</th>
+                        <th>終了予定時間</th>
+                        <th>指定勤務終了時間</th>
+                        <th>時間外時間</th>
+                        <th>業務処理内容</th>
+                        <th>指示者確認㊞</th>
+                        <th>変更</th>
+                        <th>勤怠を確認する</th>
+                      </tr>
+                    </thead>
+                    <% only.each do |one| %>
+                      <%= f.fields_for "attendances[]", one do |attendance| %>
+                        <tr>
+                          <td><%= l(one.worked_on, format: :short) %></td>
+                          <% if one.worked_on.wday == 6
+                              x = "sat"
+                            elsif one.worked_on.wday == 0
+                              x = "sun"
+                            end %>
+                          <td class="<%= x %>"><%= $days_of_the_week[one.worked_on.wday] %></td>
+                          
+                          <% if one.next_day == "1" %>
+                            <td><span style="color: red; font-size:8px;">(翌)</span><%=  l(one.sceduled_end_time, format: :time) %></td>
+                          <% else %>
+                            <td><%= l(one.sceduled_end_time, format: :time) %></td>
+                          <% end %>
+
+                          <td><%= format_basic_info(users.designated_work_end_time) %></td>
+                          <td><%= overtime_hours(users.designated_work_end_time, one.sceduled_end_time, one.next_day) %>
+                          <br><% if one.approved_finished_at.present? %><span style="color: red; font-size:8px;">【実質】</span><%= overtime_hours_real(one.sceduled_end_time, one.approved_finished_at, one.next_day) %><% end %></td>
+                          
+                          
+                          <td><%= one.business_content %></td>
+                          <td><%= attendance.select :status, @status, {selected: 2} %></td>
+                          <td><%= attendance.check_box :changes, {}, one.user_id, nil %></td>
+                          <td><%= link_to "確認", user_path( users, superior_id: @superior, attendance_id:one.id, number:3, date: one.worked_on.beginning_of_month), target: :_blank, class:"btn btn-primary" %></td>
+
+                        </tr>
+                      <% end %>
+                    <% end %>
+
+                  </table>
+                  <% @cou1 = @cou1 +1 %>
+                <% end %>
+                <%= f.submit "変更を申請する", class: "btn btn-primary form-control" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+<!-- 勤怠編集モーダルの確認ボタンの先の特定の特定の1件のみのモーダル -->
+<% if @attendance4.present? %>
+  <div class="container">
+    <div class="modal-dialog modal-lg modal-dialog-center">
+      <div class="modal-content">
+      
+        <% if @attendance4.present? %>
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h2 class="title-font">勤怠編集申請のお知らせ</span>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-12  superior-approve-style">            
+                <h6 class="modal-title" id="name-title1">【<%= @users.name %>からの勤怠編集申請】</h6>
+                <%= form_with(model:@attendance4, url: update_superior_approve_user_attendance_path(@attendance4,  attendance_id: @attendance4,superior_id: @superior, u_id:@users), local: true, method: :patch) do |f| %>
+                  <%= render 'shared/error_messages', object: @user %>
+                  <table class="table table-bordered  table-hover table-striped text" id="table-application" >
+                    <thead>
+                      <tr>
+                        <th rowspan="3"><span class="align-middle">日付</span></th>
+                        <th rowspan="3">曜日</th>
+                        <th colspan="4">変更前</th>
+                        <th colspan="4">変更後</th>
+                        <th rowspan="3">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;備考&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&thinsp;</th>
+                        <th rowspan="3">指示確認㊞</th>
+                        <th rowspan="3">変更</th>
+                        
+                      </tr>
+                      <tr>
+                        <th colspan="2">出社</th>
+                        <th colspan="2">退社</th>
+                        <th colspan="2">出社</th>
+                        <th colspan="2">退社</th>
+                      </tr>
+                      <tr>
+                        <th>時</th>
+                        <th>分</th>
+                        <th>時</th>
+                        <th>分</th>
+                        <th>時</th>
+                        <th>分</th>
+                        <th>時</th>
+                        <th>分</th>
+                      </tr>
+                    </thead>
+                    <tr>
+                      <td><%= l(@attendance4.worked_on, format: :short) %></td>
+                      <% if @attendance4.worked_on.wday == 6
+                          x = "sat"
+                        elsif @attendance4.worked_on.wday == 0
+                          x = "sun"
+                        end %>
+                      <td class="<%= x %>"><%= $days_of_the_week[@attendance4.worked_on.wday] %></td>
+                      <!-- started_at変更前の値があれば、'時'の部分を表示  -->
+                      <% if @attendance4.approved_started_at_before_last_save.present? %>
+                        <td><%= l(@attendance4.approved_started_at_before_last_save, format: :time1) %></td>
+                      <% else %>
+                        <td></td>
+                      <% end %>
+
+                      <!-- started_at変更前の値があれば、'分'の部分を表示  -->
+                      <% if @attendance4.approved_started_at_before_last_save.present? %>
+                        <td><%= l(@attendance4.approved_started_at_before_last_save.floor_to(15.minutes), format: :time2) %></td>
+                      <% else %>
+                        <td></td>
+                      <% end %>
+
+                      <!-- finished_at変更前の値があれば、'時'の部分を表示  -->
+                      <% if @attendance4.approved_finished_at_before_last_save.present? %>
+                        <% if @attendance4.approved_started_at_before_last_save.day != @attendance4.approved_finished_at_before_last_save.day %>
+                          <td><span style="color: red; font-size:8px;">(翌)</span><td><%= l(@attendance4.approved_finished_at_before_last_save, format: :time1) %></td>
+                        <% else %>
+                          <td><%= l(@attendance4.approved_finished_at_before_last_save, format: :time1) %></td>
+                        <% end %>
+                        
+                      <% else %>
+                        <td></td>
+                      <% end %>
+                      <!--<% if @attendance4.finished_at_before_last_save == nil %>
+                        <td></td>
+                      <% else %>
+                        <% if @attendance4.started_at_before_last_save.day != @attendance4.finished_at_before_last_save.day %>
+                          <td><span style="color: red; font-size:8px;">(翌)</span><%= l(@attendance4.finished_at_before_last_save, format: :time1) %></td>
+                        <% else %>
+                          <td><%= l(@attendance4.finished_at_before_last_save, format: :time1) %></td>
+                        <% end %>
+                      <% end %>-->
+
+                      <!-- finished_at変更前の値があれば、'分'の部分を表示  -->
+                      <% if @attendance4.approved_finished_at_before_last_save.present? %>
+                        <td><%= l(@attendance4.approved_finished_at_before_last_save.floor_to(15.minutes), format: :time2) %></td>
+                      <% else %>
+                        <td></td>
+                      <% end %>
+
+                      <!-- 現在申請してるstarted_atの、'時'の部分を表示 -->
+                      <td><%= l(@attendance4.started_at, format: :time1) %></td>
+                      
+
+                      <!-- 現在申請してるstarted_atの、'分'の部分を表示 -->
+                      <td><%= l(@attendance4.started_at.floor_to(15.minutes), format: :time2) %></td>
+
+                      <!-- 現在申請してるfinished_atの、'時'の部分を表示 -->
+                      <% if @attendance4.started_at.day != @attendance4.finished_at.day %>
+                        <td><span style="color: red; font-size:8px;">(翌)</span><%= l(@attendance4.finished_at, format: :time1) %></td>  
+                      <% else %>
+                        <td><%= l(@attendance4.finished_at, format: :time1) %></td>
+                      <% end %>
+
+                      <!-- 現在申請してるfinished_atの、'分'の部分を表示 -->
+                      <td><%= l(@attendance4.finished_at.floor_to(15.minutes), format: :time2) %></td>
+
+                      <td><%= @attendance4.note %></td>
+                      <td><%= f.select :status, @status, {selected: 2 }  %></td>
+                      <td><%= f.check_box :change %></td>
+                      
+
+                    </tr>
+                  </table>
+                  <%= f.submit "変更を申請する", class: "btn btn-primary form-control" %>
+                <% end %>
+                <%@cou = @cou +1%>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<!--残業申請モーダルの確認ボタンの先の特定の特定の1件のみのモーダル -->
+<% if @attendance5.present? %>
+  <div class="container">
+    <div class="modal-dialog modal-lg modal-dialog-center">
+      <div class="modal-content">
+      
+        <% if @attendance5.present? %>
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h2 class="title-font">残業申請のお知らせ</span>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-12  superior-approve-style">            
+                <h6 class="modal-title" id="name-title1">【<%= @users.name %>からの残業申請】</h6>
+                <%= form_with(model:@attendance5, url: update_superior_approve_user_attendance_path(@attendance5,  attendance_id: @attendance5,superior_id: @superior, u_id:@users), local: true, method: :patch) do |f| %>
+                  <%= render 'shared/error_messages', object: @user %>@
+                  <table class="table table-bordered  table-hover table-striped text" id="table-application" >
+                    <thead>
+                      <tr>
+                        <th><span class="align-middle">日付</span></th>
+                        <th>曜日</th>
+                        <th>終了予定時間</th>
+                        <th>指定勤務終了時間</th>
+                        <th>時間外時間</th>
+                        <th>業務処理内容</th>
+                        <th>指示者確認㊞</th>
+                        <th>変更</th>
+                      </tr>
+                    </thead>
+                    <tr>
+                        <td><%= l(@attendance5.worked_on, format: :short) %></td>
+                        <% if @attendance5.worked_on.wday == 6
+                            x = "sat"
+                          elsif @attendance5.worked_on.wday == 0
+                            x = "sun"
+                          end %>
+                        <td class="<%= x %>"><%= $days_of_the_week[@attendance5.worked_on.wday] %></td>
+                        
+                        <% if @attendance5.next_day == "1" %>
+                          <td><span style="color: red; font-size:8px;">(翌)</span><%=  l(@attendance5.sceduled_end_time, format: :time) %></td>
+                        <% else %>
+                          <td><%= l(@attendance5.sceduled_end_time, format: :time) %></td>
+                        <% end %>
+
+                        <td><%= format_basic_info(@users.designated_work_end_time) %></td>
+                        <td><%= overtime_hours(@users.designated_work_end_time, @attendance5.sceduled_end_time, @attendance5.next_day) %>
+                        <br><% if @attendance5.approved_finished_at.present? %><span style="color: red; font-size:8px;">【実質】</span><%= overtime_hours_real(@attendance5.sceduled_end_time, @attendance5.approved_finished_at, @attendance5.next_day) %><% end %></td>
+                        
+                        
+                        <td><%= @attendance5.business_content %></td>
+                        <td><%= f.select :status, @status, {selected: 2 }  %></td>
+                        <td><%= f.check_box :change %></td>
+
+                      </tr>
+                  </table>
+                  <%= f.submit "変更を申請する", class: "btn btn-primary form-control" %>
+                <% end %>
+                <%@cou = @cou1 +1%>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        
+      </div>
+    </div>
+  </div>
+<% end %>

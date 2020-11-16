@@ -40,7 +40,7 @@ class Attendance < ApplicationRecord
   def oneday_instructor_confirmation_only_update_suppression
     if oneday_instructor_confirmation.present?
       if started_at.blank? && finished_at.blank?
-        errors.add(:finished_at, "が必要です")
+        errors.add(:started_at, :finished_at, "が必要です")
       end
     end
   end
