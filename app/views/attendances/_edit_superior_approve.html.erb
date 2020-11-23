@@ -219,6 +219,57 @@
     </div>
   </div>
 <% end %>
+
+<!--1ヶ月分勤怠申請モーダルの確認ボタンの先の特定の特定の1件のみのモーダル -->
+<% if @attendance3.present? %>
+  <div class="container">
+    <div class="modal-dialog modal-lg modal-dialog-center">
+      <div class="modal-content">
+      
+        <% if @attendance3.present? %>
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h2 class="title-font">1ヶ月分の勤怠申請のお知らせ</span>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-12  superior-approve-style">            
+                <h6 class="modal-title" id="name-title1">【<%= @users.name %>1ヶ月分の勤怠申請】</h6>
+                <%= form_with(model:@attendance3, url: update_superior_approve_user_attendance_path(@attendance3,  attendance_id: @attendance3,superior_id: @superior, u_id:@users, number:@number), local: true, method: :patch) do |f| %>
+                  <%= render 'shared/error_messages', object: @user %>
+                  <table class="table table-bordered  table-hover table-striped text" id="table-application" >
+                    <thead>
+                      <tr>
+                        <th>月</th>
+                        <th>指示者確認㊞</th>
+                        <th>変更</th>
+                        
+                      </tr>
+                    </thead>
+                      <tr>
+                        <td><%= l(@attendance3.worked_on, format: :month) %></td>
+                        <td><%= f.select :status, @status, {selected: 2}, class:"form-control" %></td>
+                        <td><%= f.check_box :change %></td>
+                          
+
+                      </tr>
+                  </table>
+                  <%= f.submit "変更を申請する", class: "btn btn-primary form-control" %>
+                <% end %>
+                <%@cou = @cou1 +1%>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        
+      </div>
+    </div>
+  </div>
+<% end %>
+
+
 <!-- 勤怠編集モーダルの確認ボタンの先の特定の特定の1件のみのモーダル -->
 <% if @attendance4.present? %>
   <div class="container">
@@ -372,8 +423,8 @@
             <div class="row">
               <div class="col-md-12  superior-approve-style">            
                 <h6 class="modal-title" id="name-title1">【<%= @users.name %>からの残業申請】</h6>
-                <%= form_with(model:@attendance5, url: update_superior_approve_user_attendance_path(@attendance5,  attendance_id: @attendance5,superior_id: @superior, u_id:@users), local: true, method: :patch) do |f| %>
-                  <%= render 'shared/error_messages', object: @user %>@
+                <%= form_with(model:@attendance5, url: update_superior_approve_user_attendance_path(@attendance5,  attendance_id: @attendance5,superior_id: @superior, u_id:@users, number:@number), local: true, method: :patch) do |f| %>
+                  <%= render 'shared/error_messages', object: @user %>
                   <table class="table table-bordered  table-hover table-striped text" id="table-application" >
                     <thead>
                       <tr>

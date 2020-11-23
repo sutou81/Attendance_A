@@ -150,7 +150,11 @@
             <% end %>  
           </td>
           <% if new_finished_at.present? %>
-            <td><%= l(new_finished_at, format: :time1)  %></td>
+            <% if day.approved_finished_at == day.finished_at && day.onday_check_box == "1" %>
+              <td><span style="color: red; font-size:8px;">(翌)</span><%= l(new_finished_at, format: :time1)  %></td>
+            <% else %>
+              <td><%= l(new_finished_at, format: :time1)  %></td>
+            <% end %>
             <td><%= l(new_finished_at.floor_to(15.minutes), format: :time2)  %></td>
           <% else %>
             <td></td>
@@ -175,9 +179,13 @@
           <% else %>
             <td></td>
           <% end %>
-          
-          <td><%= l(day.approved_sceduled_end_time, format: :time1) if day.approved_sceduled_end_time.present? %></td>
+          <% if day.approved_sceduled_end_time == day.sceduled_end_time && day.next_day == "1" %>
+            <td><span style="color: red; font-size:8px;">(翌)</span><%= l(day.approved_sceduled_end_time, format: :time1) if day.approved_sceduled_end_time.present? %></td>
+          <% else %>
+            <td><%= l(day.approved_sceduled_end_time, format: :time1) if day.approved_sceduled_end_time.present? %></td>
+          <% end %>
           <td><%= l(day.approved_sceduled_end_time.floor_to(15.minutes), format: :time2) if day.approved_sceduled_end_time.present? %></td>
+          
           <td><%= overtime_hours(@user.designated_work_end_time, day.approved_sceduled_end_time, day.next_day) if day.approved_sceduled_end_time.present? %></td>
           <% if day.approved_business_content %>
             <td><%= day.approved_business_content if day.approved_sceduled_end_time.present? %></td>
@@ -204,12 +212,14 @@
         <td colspan="5"><%= format_basic_info(@user.work_time).to_f * @worked_sum %></td>
         <td colspan="5"><%= format("%.2f",@todal_working_times.to_f) %></td>
         <td colspan="3">
+        <% if correct_user_show %>
           <%= form_with(model: @one_month_approval, url: update_month_approval_user_attendance_path(@user, @one_month_approval), local: true, method: :patch) do |f| %>
             <span class="onemonth-approval" style="font-weight:bold;
           "><%= @bun %></span><span style="color: red;"><%= @katu %></span><br>
                   <%= f.collection_select :onemonth_instructor_confirmation, @superior, :id, :name,  {prompt: "選択して下さい"} %><br>
             <%= f.submit "申請する", class: "btn btn-mg btn-primary" %>
           <% end %>
+        <% end %>
         </td>
       </tr>
     </tfoot>

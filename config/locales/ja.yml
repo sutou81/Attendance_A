@@ -42,11 +42,12 @@ ja:
     - 金曜日
     - 土曜日
     formats:
-      default: "%Y/%m/%d"
+      default: "%Y-%-m-%-d"
       long: "%Y年%m月%d日(%a)"
       middle: "%Y年%m月"
       short: "%-m/%-d"
       month: "%-m月"
+      straight: "%-m/%-d"
     month_names:
     - 
     - 1月

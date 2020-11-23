@@ -5,7 +5,7 @@ class UsersController < ApplicationController
   before_action :logged_in_user, only: [:edit, :update, :destroy, :index, :edit_basic_info, :update_basic_info]
   before_action :correct_user, only: [:edit]
   before_action :show_access_limit, only: :show
-  before_action :admin_user, only: [:index, :destroy, :edit_basic_info, :update_basic_info]
+  before_action :admin_user, only: [:index, :destroy, :edit_basic_info, :update_basic_info, :employees_at_work]
   before_action :set_one_month, only: :show
   
   def new
@@ -46,11 +46,15 @@ class UsersController < ApplicationController
     end
     case params[:number]
     when "1"
+      @btn_name = "1ヶ月分の勤怠の承認"
+      @attendance_i = @specific
+      @number_i = 1
     when "2"
       @btn_name = "勤怠変更の承認"
       @attendance_i = @specific
       @number_i = 2
     when "3" 
+      debugger
       @btn_name = "残業申請の承認"
       @attendance_i = @specific
       @number_i = 3
@@ -146,7 +150,7 @@ class UsersController < ApplicationController
       @months = date.month
     end
     @attendance = @user.attendances
-    @attendance = @attendance.where.not(approved_started_at: nil)
+    @attendance = @attendance.where.not(approved_finished_at: nil)
     if params[:date]
       search = params[:date].to_date
     else
@@ -161,6 +165,11 @@ class UsersController < ApplicationController
       debugger
       render :attendance_log
     end
+  end
+
+  # 出社社員一覧
+  def employees_at_work
+    @attendance = Attendance.where.not(started_at: nil).where(finished_at: nil)
   end
   
   private

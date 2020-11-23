@@ -1,48 +1,61 @@
 <% provide(:title, "Attendance Log") %>
-<h1>勤怠ログ</h1>
-<%= form_with(model: @user,url: attendance_log_user_path(@user), method: :get, local: true, id:"form_id") do |f| %>
-  <table class="">
-    <%= link_to "リセット", attendance_log_user_path(@user, date: @reset), class:"btn btn-mg btn-primary1" %>
-    <tr>
-      <td><%= f.select :year, @year, {selected: @year_select}, id:"act1", class: "form-control" %></td>
-      <td><%= f.text_field :actually_year, readonly: true, value:@years, id:"actually1", size: 7, class:"form-control log-style" %></td>
-    </tr>
-    <tr>
-      <td><%= f.select :month, @month, {selected: @month_select}, id:"act2", class: "form-control" %></td>
-      <td><%= f.text_field :actually_month, readonly: true, value:@months, id:"actually2", size: 7, class:"form-control log-style" %></td>
-    </tr>
-  </table>
-  <p></p>
-  <%= f.hidden_field :key, :value => params[:id], id:"id" %>
-  <table class="table table-bordered table-condensed table-hover table-striped" id="log-table">
-    <thead>
-      <tr>
-        <th> 日付</th>
-        <th>変更前出勤時間</th>
-        <th>変更前退社時間</th>
-        <th>変更後出勤時間</th>
-        <th>変更後退社時間</th>
-        <th>承認者</th>
-        <th>承認日</th>
-      </tr>
-    </thead>
-    <% if !@search.blank? %>
-      <% @search.each do |attendance|  %>
-        <tr>
-          <td><%= l(attendance.worked_on.to_datetime, format: :time3) %></td>
-          <td><%= l(attendance.first_approved_started_at, format: :time) %></td>
-          <td><%= l(attendance.first_approved_finished_at, format: :time) %></td>
-          <td><%= l(attendance.approved_started_at, format: :time) %></td></td>
-          <td><%= l(attendance.approved_finished_at, format: :time) %></td>
-          <td><%= superior_search(attendance.oneday_instructor_confirmation) %></td>
-          <td><%= l(attendance.approved_update_time, format: :time3) %></td>
-        </tr>
-      <% end %>
-    <% end %>
-  </table>
-<% end %>
-<p></p>
-<span></span>
+<div class="container">
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <h1>勤怠ログ</h1>
+        <%= form_with(model: @user,url: attendance_log_user_path(@user), method: :get, local: true, id:"form_id") do |f| %>
+          <table class="">
+            <%= link_to "リセット", attendance_log_user_path(@user, date: @reset), class:"btn btn-mg btn-primary1" %>
+            <tr>
+              <td><%= f.select :year, @year, {selected: @year_select}, id:"act1", class: "form-control" %></td>
+              <td><%= f.text_field :actually_year, readonly: true, value:@years, id:"actually1", size: 7, class:"form-control log-style" %></td>
+            </tr>
+            <tr>
+              <td><%= f.select :month, @month, {selected: @month_select}, id:"act2", class: "form-control" %></td>
+              <td><%= f.text_field :actually_month, readonly: true, value:@months, id:"actually2", size: 7, class:"form-control log-style" %></td>
+            </tr>
+          </table>
+          <p></p>
+          <%= f.hidden_field :key, :value => params[:id], id:"id" %>
+          <table class="table table-bordered table-condensed table-hover table-striped" id="log-table">
+            <thead>
+              <tr>
+                <th> 日付</th>
+                <th>変更前出勤時間</th>
+                <th>変更前退社時間</th>
+                <th>変更後出勤時間</th>
+                <th>変更後退社時間</th>
+                <th>&nbsp;&nbsp;承認者&nbsp;&nbsp;</th>
+                <th>承認日</th>
+              </tr>
+            </thead>
+            <% if !@search.blank? %>
+              <% @search.each do |attendance|  %>
+                <tr>
+                
+                  <td><%= l(attendance.worked_on.to_datetime, format: :time3) %></td>
+                  <% if attendance.first_approved_started_at.present? && attendance.first_approved_finished_at.present? %>
+                    <td><%= l(attendance.first_approved_started_at, format: :time) %></td>
+                    <td><%= l(attendance.first_approved_finished_at, format: :time) %></td>
+                  <% else %>
+                    <td></td>
+                    <td></td>
+                  <% end %>
+                  <td><%= l(attendance.approved_started_at, format: :time) %></td></td>
+                  <td><%= l(attendance.approved_finished_at, format: :time) %></td>
+                  <td><%= superior_search(attendance.oneday_instructor_confirmation) %></td>
+                  <td><%= l(attendance.approved_update_time, format: :time3) %></td>
+                </tr>
+              <% end %>
+            <% end %>
+          </table>
+        <% end %>
+        <p></p>
+        <span></span>
+      
+      </div>
+    </div>
+</div>
 <script>
   
 

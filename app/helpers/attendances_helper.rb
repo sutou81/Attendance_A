@@ -9,6 +9,17 @@ module AttendancesHelper
     # どれにも当てはまらなかった場合はfalseを返します。
     false
   end
+
+  # 当日出勤しているユーザーを特定
+  def employees_at_work(attendance)
+    if Date.current == attendance.worked_on
+      return u = User.find(attendance.user_id)
+      return u
+    end
+    # どれにも当てはまらなかった場合はfalseを返します。
+    false
+  end
+
   #  Date.current == attendance.worked_on より前日の日にstarted_atのみ(出勤登録のみ投下)でfinished_atの投下せず翌日になってしまった時にそれを消去する
   def attendance_state_before_day(attendance)
     if Date.current > attendance.worked_on
@@ -92,5 +103,7 @@ module AttendancesHelper
     else
       format("%.2f", (((s - a) / 60) / 60.0))
     end
+
+    
   end
 end

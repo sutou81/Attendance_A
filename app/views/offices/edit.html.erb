@@ -1,0 +1,24 @@
+<% provide(:title, "拠点情報の編集") %>
+<% provide(:class_text, 'user--edit') %>
+<div class="container">
+  <h1>拠点情報の編集</h1>
+  <div class="row">
+    <div class="col-md-6 col-md-offset-3">
+      <%= form_with(model:@office, local: true) do |f| %>
+        <%= render 'shared/error_messages', object: @office %>
+        <%= f.label :office_number, class: "label-#{yield(:class_text)} text-left" %>
+        <%= f.number_field :office_number, :min => 1, :max => 999999,  class: "form-control" %>
+
+        <%= f.label :office_name, class: "label-#{yield(:class_text)}" %>
+        <%= f.text_field :office_name, class: "form-control" %>
+
+        <%= f.label :attendance_type, class: "label-#{yield(:class_text)}" %>
+        <%= f.select :attendance_type, {"出勤": "出勤", "退勤": "退勤"},  {selected: "出勤"}, class: "form-control" %>
+
+        <%= f.submit "拠点情報の更新", class: "btn btn-primary btn-block btn-#{yield(:class_text)}" %>
+      <% end %>
+    </div>
+    
+  </div>
+  
+</div>

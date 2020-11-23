@@ -35,6 +35,9 @@
                 <td><%= attendance.time_field :started_at, class:"form-control", id: "sample#{cou}" %></td>
                 <td><%= attendance.time_field :finished_at, class:"form-control", id: "example#{cou}",:onChange=>"javascript: func1();" %></td>
               <% else %>
+                <% if day.started_at.present? && day.finished_at.nil? %>
+                  <% day.started_at = nil %>
+                <% end %>
                 <td><%= attendance.time_field :started_at, class:"form-control", id: "sample#{cou}" %></td>
                 <td><%= attendance.time_field :finished_at, class:"form-control", id: "example#{cou}"%></td>
               <% end %> 

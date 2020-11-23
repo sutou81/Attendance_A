@@ -23,6 +23,7 @@ Rails.application.routes.draw do
       patch 'attendances/new_update_superior_approve' # この行が追加対象です。
       get 'attendance_log'
       patch 'update_month_approval'
+      get 'employees_at_work' # 社員一覧
     end
     collection { post :import } 
     resources :attendances do
@@ -35,4 +36,5 @@ Rails.application.routes.draw do
       end
     end
   end
+  resources :offices
 end

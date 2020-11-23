@@ -277,7 +277,7 @@
                           <td><%= one.business_content %></td>
                           <td><%= attendance.select :status, @status, {selected: 2} %></td>
                           <td><%= attendance.check_box :changes, {}, one.user_id, nil %></td>
-                          <td><%= link_to "確認", user_path( users, superior_id: @superior, attendance_id:one.id, number:3, date: one.worked_on.beginning_of_month), target: :_blank, class:"btn btn-primary" %></td>
+                          <td><%= link_to "確認", user_path(users, superior_id: @superior, attendance_id:one.id, number:3, date: one.worked_on.beginning_of_month), target: :_blank, class:"btn btn-primary" %></td>
 
                         </tr>
                       <% end %>

@@ -92,6 +92,7 @@ class AttendancesController < ApplicationController
         # end       
       end
     end
+    debugger
     if count > 0
       flash[:success] = "勤怠変更を合計#{count}件申請しました。"
     else
@@ -145,10 +146,10 @@ class AttendancesController < ApplicationController
       end 
     end
     flash[:success] = "残業を申請しました"
-    redirect_to user_url(@user)
+    redirect_to user_url(@user,date:@attendance.worked_on.beginning_of_month)
   rescue ActiveRecord::RecordInvalid # トランザクション���よるエラーの分岐です。
     flash[:danger] = "未入力な項目があった為、申請をキャンセルしました。"
-    redirect_to user_url(@user) and return
+    redirect_to user_url(@user,date:@attendance.worked_on.beginning_of_month) and return
   end
 
   
@@ -157,6 +158,36 @@ class AttendancesController < ApplicationController
     @user = User.find(params[:user_id])
     case params[:number]
     when "1"
+      @attendance = Attendance.where(onemonth_instructor_confirmation: @user.id).order(:user_id, :worked_on)
+      @cou1 =0
+      @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
+      attendance = Attendance.where(onemonth_instructor_confirmation: @user.id)
+      @superior = params[:user_id]
+      if attendance.blank? && @attendance.blank?
+        @users = User.find(params[:user_id]) # 勤怠を編集した人のUserモデルのデータが入ってる
+        @attendance3 = Attendance.find(params[:a_id]) 
+        @superior = params[:superior_id]
+        @number = params[:number]
+      else
+        # 申請者のuser_idを配列にしてる
+        attendance.order(:user_id, :worked_on)
+        count = attendance.count
+        while count > 0
+          d = attendance[attendance.count-count].user_id
+          if count == attendance.count
+            @ary = []
+
+          end
+
+          if attendance[attendance.count-count].user_id != attendance[attendance.count-(count+1)].user_id
+            @ary.push(d)
+          elsif d.present?
+            @ary.push(d)
+            @ary.uniq!
+          end
+          count -= 1
+        end
+      end
 
     when "2"
       
@@ -203,6 +234,7 @@ class AttendancesController < ApplicationController
         @users = User.find(params[:user_id]) # 勤怠を編集した人のUserモデルのデータが入ってる
         @attendance5 = Attendance.find(params[:a_id]) 
         @superior = params[:superior_id]
+        @number = params[:number]
       else
         # 申請者のuser_idを配列にしてる
         attendance.order(:user_id, :worked_on)
@@ -228,11 +260,40 @@ class AttendancesController < ApplicationController
 
   # 確認ボタン1件のみの更新・各申請を申請中から変更した場合ここで更新する
   def update_superior_approve
-    debugger 
     @superior = params[:superior_id]
     if params[:attendance][:status] != "2" && params[:attendance][:change] == "1"
+      debugger
       case params[:number]
       when "1"
+        debugger
+        attendance = Attendance.find(params[:attendance_id])
+        a = params[:attendance][:status].to_i
+        @superior = attendance.onemonth_instructor_confirmation
+        debugger
+        if a == 1
+          attendance.onemonth_application_status = "所属長承認： 未申請"
+          attendance.onemonth_instructor_confirmation =nil
+          debugger
+          attendance.save
+          flash[:success] = "1ヶ月分の勤怠を'なし'にしました"
+          debugger
+          redirect_to user_path(@superior)
+        elsif a == 3
+          debugger
+          @user = User.find(@superior)
+          attendance.onemonth_application_status = "所属長承認： #{@user.name}より1ヶ月分の勤怠承認済み"
+          attendance.onemonth_instructor_confirmation =nil
+          attendance.save
+          flash[:success] = "1ヶ月分の勤怠を'承認'しました"
+          redirect_to user_path(@superior)
+        elsif a == 4
+          @user = User.find(@superior)
+          attendance.overtime_application_status = "所属長承認： #{@user.name}より1ヶ月分の勤怠申請否認"
+          attendance.onemonth_instructor_confirmation =nil
+          attendance.save
+          flash[:success] = "1ヶ月分の勤怠を'否認'しました"
+          redirect_to user_path(@superior)
+        end
       when "2"
         debugger
         attendance = Attendance.find(params[:attendance_id])
@@ -252,9 +313,10 @@ class AttendancesController < ApplicationController
           attendance.approved_started_at = attendance.started_at
           attendance.approved_finished_at = attendance.finished_at
           if (attendance.first_approved_started_at && attendance.first_approved_finished_at) == nil
+            debugger
             if attendance.approved_started_at_in_database != nil && attendance.approved_finished_at_in_database != nil
-              attendance.first_approved_started_at = attendance.approved_started_at
-              attendance.first_approved_finished_at = attendance.approved_finished_at
+              attendance.first_approved_started_at = attendance.approved_started_at_in_database
+              attendance.first_approved_finished_at = attendance.approved_finished_at_in_database
             end
           end
           attendance.approved_update_time = Time.current
@@ -271,14 +333,20 @@ class AttendancesController < ApplicationController
           redirect_to user_path(@superior)
         end
       when "3"
+        attendance = Attendance.find(params[:attendance_id])
+        a = params[:attendance][:status].to_i
+        @superior = attendance.instructor_confirmation
+        debugger
         if a == 1
           attendance.sceduled_end_time = nil
           attendance.next_day = nil
           attendance.business_content = nil
           attendance.instructor_confirmation = nil
           attendance.overtime_application_status = nil
+          debugger
           attendance.save
           flash[:success] = "残業申請を'なし'にしました"
+          debugger
           redirect_to user_path(@superior)
         elsif a == 3
           attendance.approved_sceduled_end_time = attendance.sceduled_end_time
@@ -313,7 +381,7 @@ class AttendancesController < ApplicationController
       @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
       attendance = Attendance.where(onemonth_instructor_confirmation: @user.id)
       attendance = attendance.where("onemonth_application_status LIKE ?", "%申請中%")
-      @superior = params[:user_id]
+      @superior = params[:id]
       if attendance.blank? && @attendance.blank?
         @users = User.find(params[:user_id]) # 1ヶ月勤怠申請した人のUserモデルのデータが入ってる
         @attendance5 = Attendance.find(params[:a_id]) 
@@ -338,7 +406,6 @@ class AttendancesController < ApplicationController
           end
           count -= 1
         end
-        debugger
       end
     when "2"
       @attendance1 = Attendance.where(oneday_instructor_confirmation: @user.id).order(:user_id, :worked_on)
@@ -382,7 +449,8 @@ class AttendancesController < ApplicationController
       @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
       attendance = Attendance.where(instructor_confirmation: @user.id)
       attendance = attendance.where("overtime_application_status LIKE ?", "%申請中%")
-      @superior = params[:user_id]
+      debugger
+      @superior = params[:id]
       if attendance.blank? && @attendance2.blank?
         @users = User.find(params[:user_id]) # 勤怠を編集した人のUserモデルのデータが入ってる
         @attendance5 = Attendance.find(params[:a_id]) 
@@ -445,6 +513,27 @@ class AttendancesController < ApplicationController
       }
       case params[:number]
       when "1" # 1か月の勤怠申請関連
+        ary.each do |a|
+          attendance = Attendance.find(a[0]) # ここで申請してきた勤怠を特定する
+          if a[1] == 1
+            attendance.onemonth_application_status = "所属長承認： 未申請"
+            attendance.onemonth_instructor_confirmation =nil
+            attendance.save
+            l += 1
+          elsif a[1] == 3
+            attendance.onemonth_application_status = "所属長承認： #{@user.name}より1ヶ月分の勤怠承認済み"
+            attendance.onemonth_instructor_confirmation =nil
+            attendance.save
+            m += 1
+          elsif a[1] == 4
+            attendance.onemonth_application_status = "所属長承認： #{@user.name}より1ヶ月分の勤怠申請否認"
+            attendance.onemonth_instructor_confirmation =nil
+            attendance.save
+            n += 1
+          end
+        end
+        flash[:success] = "残業申請を 承認: #{m}件、否認: #{n}件、なし: #{l}件 しました。"
+        redirect_to user_path(@user)
 
       when "2" # 勤怠編集申請関連
         # ↓ 指示確認印が'申請中'または変更チェックボタンがないものを取り除く
@@ -468,8 +557,8 @@ class AttendancesController < ApplicationController
             attendance.approved_finished_at = attendance.finished_at
             if (attendance.first_approved_started_at && attendance.first_approved_finished_at) == nil
               if attendance.approved_started_at_in_database != nil && attendance.approved_finished_at_in_database != nil
-                attendance.first_approved_started_at = attendance.approved_started_at
-                attendance.first_approved_finished_at = attendance.approved_finished_at
+                attendance.first_approved_started_at = attendance.approved_started_at_in_database
+                attendance.first_approved_finished_at = attendance.approved_finished_at_in_database
               end
             end
             attendance.approved_update_time = Time.current
@@ -532,8 +621,8 @@ class AttendancesController < ApplicationController
 
   # 1ヶ月申請をする
   def update_month_approval
-    debugger
     @user = User.find(params[:user_id])
+    @attendance = Attendance.find(params[:id])
     if params[:attendance][:onemonth_instructor_confirmation].present?
       @user = User.find(params[:user_id])
       @superior = User.find(params[:attendance][:onemonth_instructor_confirmation])
@@ -541,19 +630,16 @@ class AttendancesController < ApplicationController
       @attendance.onemonth_application_status = "所属長承認： #{@superior.name}に申請中"
       status = "所属長承認： #{@superior.name}に申請中"
       month_superior_params[:onemonth_application_status] = "所属長承認： #{@superior.name}に申請中"
-      debugger
       if @attendance.update_attributes(month_superior_params)
-        debugger
         flash[:success] = "#{@superior.name}に1ヶ月分の勤怠を申請しました"
-        redirect_to user_url(@user)
+        redirect_to user_url(@user,date:@attendance.worked_on.beginning_of_month)
       else
         flash[:success] = "1ヶ月分の勤怠申請に失敗しました"
-        redirect_to user_url(@user)
+        redirect_to user_url(@user, date:@attendance.worked_on.beginning_of_month)
       end
     else
-      debugger
       flash[:danger] = "申請先の上長を選択してください"
-      redirect_to user_url(@user)
+      redirect_to user_url(@user, date:@attendance.worked_on.beginning_of_month)
     end
   end
   private
