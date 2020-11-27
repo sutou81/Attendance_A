@@ -1,0 +1,20 @@
+$(".js").remove();
+$("#log-table").append('<% @search1.each do |attendance|  %>'+
+                  '<tr class="js">'+
+                  
+                    '<td><%= l(attendance.worked_on.to_datetime, format: :time3) %></td>'+
+                    '<% if attendance.first_approved_started_at.present? && attendance.first_approved_finished_at.present? %>'+
+                      '<td><%= l(attendance.first_approved_started_at, format: :time) %></td>'+
+                      '<td><%= l(attendance.first_approved_finished_at, format: :time) %></td>'+
+                    '<% else %>'+
+                      '<td></td>'+
+                      '<td></td>'+
+                    '<% end %>'+
+                    '<td><%= l(attendance.approved_started_at, format: :time) %></td></td>'+
+                    '<td><%= l(attendance.approved_finished_at, format: :time) %></td>'+
+                    '<td><%= superior_search(attendance.oneday_instructor_confirmation) %></td>'+
+                    '<td><%= l(attendance.approved_update_time, format: :time3) %></td>'+
+                  '</tr>'+
+                '<% end %>');
+$('#act1').reset();
+$('#act2').reset();

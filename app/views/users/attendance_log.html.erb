@@ -1,11 +1,12 @@
 <% provide(:title, "Attendance Log") %>
-<div class="container">
+  <div class="container">
     <div class="row">
       <div class="col-md-10 col-md-offset-1">
         <h1>勤怠ログ</h1>
-        <%= form_with(model: @user,url: attendance_log_user_path(@user), method: :get, local: true, id:"form_id") do |f| %>
+        <%= form_with(model: @user,url: attendance_log_user_path(@user), method: :get , id:"form_id") do |f| %>
           <table class="">
             <%= link_to "リセット", attendance_log_user_path(@user, date: @reset), class:"btn btn-mg btn-primary1" %>
+            
             <tr>
               <td><%= f.select :year, @year, {selected: @year_select}, id:"act1", class: "form-control" %></td>
               <td><%= f.text_field :actually_year, readonly: true, value:@years, id:"actually1", size: 7, class:"form-control log-style" %></td>
@@ -29,33 +30,36 @@
                 <th>承認日</th>
               </tr>
             </thead>
-            <% if !@search.blank? %>
-              <% @search.each do |attendance|  %>
-                <tr>
+            <tbody>
+              <% if !@search1.blank? %>
                 
-                  <td><%= l(attendance.worked_on.to_datetime, format: :time3) %></td>
-                  <% if attendance.first_approved_started_at.present? && attendance.first_approved_finished_at.present? %>
-                    <td><%= l(attendance.first_approved_started_at, format: :time) %></td>
-                    <td><%= l(attendance.first_approved_finished_at, format: :time) %></td>
-                  <% else %>
-                    <td></td>
-                    <td></td>
-                  <% end %>
-                  <td><%= l(attendance.approved_started_at, format: :time) %></td></td>
-                  <td><%= l(attendance.approved_finished_at, format: :time) %></td>
-                  <td><%= superior_search(attendance.oneday_instructor_confirmation) %></td>
-                  <td><%= l(attendance.approved_update_time, format: :time3) %></td>
-                </tr>
+              <% elsif !@search.blank? && @search1.blank? %>
+                <% @search.each do |attendance|  %>
+                  <tr class="js">
+                  
+                    <td><%= l(attendance.worked_on.to_datetime, format: :time3) %></td>
+                    <% if attendance.first_approved_started_at.present? && attendance.first_approved_finished_at.present? %>
+                      <td><%= l(attendance.first_approved_started_at, format: :time) %></td>
+                      <td><%= l(attendance.first_approved_finished_at, format: :time) %></td>
+                    <% else %>
+                      <td></td>
+                      <td></td>
+                    <% end %>
+                    <td><%= l(attendance.approved_started_at, format: :time) %></td></td>
+                    <td><%= l(attendance.approved_finished_at, format: :time) %></td>
+                    <td><%= superior_search(attendance.oneday_instructor_confirmation) %></td>
+                    <td><%= l(attendance.approved_update_time, format: :time3) %></td>
+                  </tr>
+                <% end %>
               <% end %>
-            <% end %>
+            </tbody>
           </table>
         <% end %>
         <p></p>
         <span></span>
-      
       </div>
     </div>
-</div>
+  </div>
 <script>
   
 
@@ -70,9 +74,53 @@ $(function() {
     $('#act2').change(function() {
       var val1 = $(this).val();
       var id = $('#id').val();
-      var url = "/users/" + id + "/attendance_log"
-    $('#form_id').submit();
+      var url = $(this).attr('action');
+
+      $('#form_id').submit();
+      $('#form_id').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: url,
+          type: "GET",
+
+          data: {year : val,
+                month : val1 },
+          datatype: "script"
+        })
+        .then(
+            // 1つめは通信成功時のコールバック
+            function (data) {
+              var select = $('#act1').val();
+              var select1 = $('#act2').val();
+              select1 = select1-1;
+              val1 = val1-1;
+              $('#actually1').val("");
+              $('#actually2').val("");
+              setTimeout(function() {
+              $('#actually1').val(val);
+              $('#actually2').val(val1);}, 1000 );
+              $('#act1').val("1");
+              $('#act2').val("1"); 
+            },
+            // 2つめは通信失敗時のコールバック
+            function () {
+              var select = $('#act1').val();
+              var select1 = $('#act2').val();
+              select1 = select1-1;
+              val1 = val1-1;
+              $('#actually1').val(null);
+              $('#actually2').val(null);
+              $('#actually1').val(val);
+              $('#actually2').val(val1);
+              $('#act1').val("1");
+              $('#act2').val("1");
+        });
+      });
+      
     });
   });
 });
+
+
 </script>
+

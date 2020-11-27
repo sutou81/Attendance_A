@@ -257,6 +257,7 @@ table, tr, th, td {
  
 }
 
+/* attendance_logのテーブル */
 #log-table{
   th {
   
@@ -268,4 +269,15 @@ table, tr, th, td {
     vertical-align: middle;
     text-align: center;
   }
+}
+
+/* attendance_logのテーブルのボタン装飾 */
+.btn-color{
+  margin-left: 10px;
+  color: #fff;
+  font-weight: bold;
+  background-color: rgb(250, 175, 212);
+  border-color: mediumblue;
+  border-width: 5px;
+  border-radius: 5px;
 }

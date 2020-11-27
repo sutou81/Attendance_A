@@ -59,6 +59,40 @@ class UsersController < ApplicationController
       @attendance_i = @specific
       @number_i = 3
     end
+    if params[:date]
+      month = params[:date].to_date
+      @month = month.month
+    end
+    respond_to do |format|
+      format.html
+      format.csv do |csv|
+        send_posts_csv(@attendances, @month)
+      end
+    end
+  end
+
+  def send_posts_csv(attendances,month)
+    require 'csv'
+
+    bom = "\uFEFF"
+    CSV.generate(bom) do |csv|
+      column_names = %w(日付 曜日 出社時間 退社時間 在社時間)
+      csv << column_names
+      attendances.each do |day|
+        debugger
+        a = day.approved_started_at == nil ? nil : l(day.approved_started_at, format: :time)
+        b = day.approved_finished_at == nil ? nil : l(day.approved_finished_at, format: :time)
+        column_values = [
+          l(day.worked_on, format: :short),
+          $days_of_the_week[day.worked_on.wday],
+          a,
+          b
+          
+        ]
+        csv << column_values
+      end
+    end
+    send_data render_to_string, filename: "#{month}月の勤怠.csv", type: :csv
   end
   
   def create
@@ -161,9 +195,12 @@ class UsersController < ApplicationController
     @year_select = 1
     @month = {" 月 ": 1, "1": 2, "2": 3,"4": 5, "5": 6, "6": 7, "7": 8, "8": 9, "9": 10, "10": 11, "11": 12, "12": 13 }
     @month_select = 1
-    if params[:year]
-      debugger
-      render :attendance_log
+    @ajax = "できた"
+    respond_to do |format|
+      format.html
+      format.js {@search=nil, @search1=@attendance.where(worked_on: search.beginning_of_month..search.end_of_month) }
+
+      
     end
   end
 

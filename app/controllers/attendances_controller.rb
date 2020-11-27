@@ -92,7 +92,6 @@ class AttendancesController < ApplicationController
         # end       
       end
     end
-    debugger
     if count > 0
       flash[:success] = "勤怠変更を合計#{count}件申請しました。"
     else
@@ -562,7 +561,6 @@ class AttendancesController < ApplicationController
               end
             end
             attendance.approved_update_time = Time.current
-            debugger
             attendance.approved_note = attendance.note
             attendance.attendance_application_status = "勤怠編集承認済み"
             attendance.save
