@@ -4,18 +4,12 @@
       <div class="col-md-10 col-md-offset-1">
         <h1>勤怠ログ</h1>
         <%= form_with(model: @user,url: attendance_log_user_path(@user), method: :get , id:"form_id") do |f| %>
-          <table class="">
-            <%= link_to "リセット", attendance_log_user_path(@user, date: @reset), class:"btn btn-mg btn-primary1" %>
-            
-            <tr>
-              <td><%= f.select :year, @year, {selected: @year_select}, id:"act1", class: "form-control" %></td>
-              <td><%= f.text_field :actually_year, readonly: true, value:@years, id:"actually1", size: 7, class:"form-control log-style" %></td>
-            </tr>
-            <tr>
-              <td><%= f.select :month, @month, {selected: @month_select}, id:"act2", class: "form-control" %></td>
-              <td><%= f.text_field :actually_month, readonly: true, value:@months, id:"actually2", size: 7, class:"form-control log-style" %></td>
-            </tr>
-          </table>
+          <div class="col-md-3">
+              <%= f.select :year, @year, {selected: @year_select}, id:"act1", class: "form-control" %>
+              <%= f.select :month, @month, {selected: @month_select}, id:"act2", class: "form-control" %>
+              <%= link_to "リセット", attendance_log_user_path(@user, date: @reset), class:"btn btn-mg btn-primary1" %>
+              <%= f.submit "検索" ,class:"btn btn-mg btn-primary", id:"submit" %>
+          </div>
           <p></p>
           <%= f.hidden_field :key, :value => params[:id], id:"id" %>
           <table class="table table-bordered table-condensed table-hover table-striped" id="log-table">
@@ -76,9 +70,10 @@ $(function() {
       var id = $('#id').val();
       var url = $(this).attr('action');
 
-      $('#form_id').submit();
-      $('#form_id').submit(function(e) {
+      //$('#form_id').submit();
+      $('#form_id').on('submit',function(e){
         e.preventDefault();
+        var _this = $(this);
         $.ajax({
             url: url,
           type: "GET",
@@ -99,8 +94,10 @@ $(function() {
               setTimeout(function() {
               $('#actually1').val(val);
               $('#actually2').val(val1);}, 1000 );
+
               $('#act1').val("1");
               $('#act2').val("1"); 
+              $('#form_id').submit
             },
             // 2つめは通信失敗時のコールバック
             function () {
