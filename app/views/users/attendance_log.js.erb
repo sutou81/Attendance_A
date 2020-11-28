@@ -16,5 +16,5 @@ $("#log-table").append('<% @search1.each do |attendance|  %>'+
                     '<td><%= l(attendance.approved_update_time, format: :time3) %></td>'+
                   '</tr>'+
                 '<% end %>');
-$('#act1').reset();
-$('#act2').reset();
+$('#act1').val("1");
+$('#act2').val("1");

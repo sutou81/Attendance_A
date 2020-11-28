@@ -58,7 +58,7 @@
   
 
 
-$(function() {
+$(document).on('turbolinks:load', function(){
  
   //セレクトボックスが切り替わったら発動
   $('#act1').change(function() {
@@ -82,36 +82,31 @@ $(function() {
                 month : val1 },
           datatype: "script"
         })
-        .then(
-            // 1つめは通信成功時のコールバック
-            function (data) {
-              var select = $('#act1').val();
-              var select1 = $('#act2').val();
-              select1 = select1-1;
-              val1 = val1-1;
-              $('#actually1').val("");
-              $('#actually2').val("");
-              setTimeout(function() {
-              $('#actually1').val(val);
-              $('#actually2').val(val1);}, 1000 );
+        .done(function(data)(
+        // 1つめは通信成功時のコールバック
+      
+          var select = $('#act1').val();
+          var select1 = $('#act2').val();
+          select1 = select1-1;
+          val1 = val1-1;
+          $('#actually1').val("");
+          $('#actually2').val("");
+          setTimeout(function() {
+          $('#actually1').val(val);
+          $('#actually2').val(val1);}, 1000 );
 
-              $('#act1').val("1");
-              $('#act2').val("1"); 
-              $('#form_id').submit
-            },
-            // 2つめは通信失敗時のコールバック
-            function () {
-              var select = $('#act1').val();
-              var select1 = $('#act2').val();
-              select1 = select1-1;
-              val1 = val1-1;
-              $('#actually1').val(null);
-              $('#actually2').val(null);
-              $('#actually1').val(val);
-              $('#actually2').val(val1);
-              $('#act1').val("1");
-              $('#act2').val("1");
-        });
+          $('#act1').val("1");
+          $('#act2').val("1"); 
+          alert('エラーが発生したためメッセージは送信できませんでした。');
+        }),
+        .fail(function(data){
+          alert('エラーが発生したためメッセージは送信できませんでした。');
+        })
+        .always(function(data){
+          $('#submit').prop('disabled', false); //ここで解除している
+          $('#act1').val("1");
+          $('#act2').val("1");
+        })
       });
       
     });
