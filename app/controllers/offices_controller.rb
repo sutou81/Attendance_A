@@ -37,7 +37,6 @@ class OfficesController < ApplicationController
   end
 
   def update
-    debugger
     if @office.update_attributes(office_params)
       flash[:success] = "拠点:#{@office.office_name}の拠点情報を更新しました。"
       redirect_to offices_url

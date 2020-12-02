@@ -54,7 +54,6 @@ class UsersController < ApplicationController
       @attendance_i = @specific
       @number_i = 2
     when "3" 
-      debugger
       @btn_name = "残業申請の承認"
       @attendance_i = @specific
       @number_i = 3
@@ -79,7 +78,6 @@ class UsersController < ApplicationController
       column_names = %w(日付 曜日 出社時間 退社時間 在社時間)
       csv << column_names
       attendances.each do |day|
-        debugger
         a = day.approved_started_at == nil ? nil : l(day.approved_started_at, format: :time)
         b = day.approved_finished_at == nil ? nil : l(day.approved_finished_at, format: :time)
         column_values = [

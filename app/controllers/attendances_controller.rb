@@ -261,24 +261,18 @@ class AttendancesController < ApplicationController
   def update_superior_approve
     @superior = params[:superior_id]
     if params[:attendance][:status] != "2" && params[:attendance][:change] == "1"
-      debugger
       case params[:number]
       when "1"
-        debugger
         attendance = Attendance.find(params[:attendance_id])
         a = params[:attendance][:status].to_i
         @superior = attendance.onemonth_instructor_confirmation
-        debugger
         if a == 1
           attendance.onemonth_application_status = "所属長承認： 未申請"
           attendance.onemonth_instructor_confirmation =nil
-          debugger
           attendance.save
           flash[:success] = "1ヶ月分の勤怠を'なし'にしました"
-          debugger
           redirect_to user_path(@superior)
         elsif a == 3
-          debugger
           @user = User.find(@superior)
           attendance.onemonth_application_status = "所属長承認： #{@user.name}より1ヶ月分の勤怠承認済み"
           attendance.onemonth_instructor_confirmation =nil
@@ -294,7 +288,6 @@ class AttendancesController < ApplicationController
           redirect_to user_path(@superior)
         end
       when "2"
-        debugger
         attendance = Attendance.find(params[:attendance_id])
         a = params[:attendance][:status].to_i
         if a == 1
@@ -308,18 +301,15 @@ class AttendancesController < ApplicationController
             flash[:success] = "勤怠編集を'なし'にしました"
             redirect_to user_path(@superior)
         elsif a == 3
-          debugger
           attendance.approved_started_at = attendance.started_at
           attendance.approved_finished_at = attendance.finished_at
           if (attendance.first_approved_started_at && attendance.first_approved_finished_at) == nil
-            debugger
             if attendance.approved_started_at_in_database != nil && attendance.approved_finished_at_in_database != nil
               attendance.first_approved_started_at = attendance.approved_started_at_in_database
               attendance.first_approved_finished_at = attendance.approved_finished_at_in_database
             end
           end
           attendance.approved_update_time = Time.current
-          debugger
           attendance.approved_note = attendance.note
           attendance.attendance_application_status = "勤怠編集承認済み"
           attendance.save
@@ -335,17 +325,14 @@ class AttendancesController < ApplicationController
         attendance = Attendance.find(params[:attendance_id])
         a = params[:attendance][:status].to_i
         @superior = attendance.instructor_confirmation
-        debugger
         if a == 1
           attendance.sceduled_end_time = nil
           attendance.next_day = nil
           attendance.business_content = nil
           attendance.instructor_confirmation = nil
           attendance.overtime_application_status = nil
-          debugger
           attendance.save
           flash[:success] = "残業申請を'なし'にしました"
-          debugger
           redirect_to user_path(@superior)
         elsif a == 3
           attendance.approved_sceduled_end_time = attendance.sceduled_end_time
@@ -448,7 +435,6 @@ class AttendancesController < ApplicationController
       @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
       attendance = Attendance.where(instructor_confirmation: @user.id)
       attendance = attendance.where("overtime_application_status LIKE ?", "%申請中%")
-      debugger
       @superior = params[:id]
       if attendance.blank? && @attendance2.blank?
         @users = User.find(params[:user_id]) # 勤怠を編集した人のUserモデルのデータが入ってる
@@ -577,7 +563,6 @@ class AttendancesController < ApplicationController
         redirect_to user_path(@user)
 
       when "3" # 残業申請関連
-        debugger
         ary.each do |a|
           attendance = Attendance.find(a[0]) # ここで申請してきたユーザーを特定する
           if a[1] == 1
