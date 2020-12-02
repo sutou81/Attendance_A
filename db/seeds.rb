@@ -6,8 +6,9 @@ User.create!(name: "Sample User",
              password_confirmation: "password",
              admin: true)
 
+a = ["一般ユーザーA", "一般ユーザーB"]           
 2.times do |n|
-  name  = ["一般ユーザーA", "一般ユーザーB"]
+  name  = a[n]
   email = "sample-#{n+1}@email.com"
   num = n+1
   numb = "2#{"%03d" % num}"
