@@ -19,9 +19,10 @@
             <ul class="dropdown-menu">
               <% unless current_user.admin? %>
                 <li><%= link_to '勤怠システム', user_path(@user) %></li>
+                <li><%= link_to '設定', edit_user_path(@user) %></li>
+                <li class="divider"></li> <!-- divider:区切り線みたいなもの -->
               <% end %>
-              <li><%= link_to '設定', edit_user_path(@user) %></li>
-              <li class="divider"></li> <!-- divider:区切り線みたいなもの -->
+
               <li><%= link_to 'ログアウト', logout_path, method: :delete %></li>
             </ul>
           </li>
