@@ -44,4 +44,7 @@ class Attendance < ApplicationRecord
       end
     end
   end
+
+  def approved_sceduled_end_time_attendance
+  end
 end

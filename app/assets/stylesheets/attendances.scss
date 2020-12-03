@@ -80,3 +80,24 @@
   vertical-align: middle;
   text-align: center;
 }
+
+.border{
+  margin-top: 10px;
+  margin: 2em auto;
+  padding: 1em;
+  color: #555555; /* 文字色 */
+  background-color: #ffcccc; /* 背景色 */
+  box-shadow: 0 0 10px 10px #ffcccc; /* 影 */
+  position: relative;
+}
+.title-kage3 {  
+  position: absolute;
+  left: 10px;
+  top: 2px;
+  padding: 0 .5em;
+  font-weight: bold;
+  color: #769164; /* タイトル色 */
+  border-style: none none solid;
+  border-color: #d6e9ca; /*タイトル下線 */
+  border-width: 3px;
+ }

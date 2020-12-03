@@ -152,13 +152,13 @@
                           <!-- finished_at変更前の値があれば、'時'の部分を表示  -->
                           <% if one.approved_finished_at_before_last_save.present? %>
                             <% if one.approved_started_at_before_last_save.day != one.approved_finished_at_before_last_save.day %>
-                              <td><span style="color: red; font-size:8px;">(翌)</span><td><%= l(one.approved_finished_at_before_last_save, format: :time1) %></td>
+                              <td><span style="color: red; font-size:8px;">(翌)</span><%= l(one.approved_finished_at_before_last_save, format: :time1) %></td>
                             <% else %>
                               <td><%= l(one.approved_finished_at_before_last_save, format: :time1) %></td>
                             <% end %>
                           <% elsif one.approved_finished_at.present? %>
                             <% if one.approved_started_at.day != one.approved_finished_at.day %>
-                              <td><span style="color: red; font-size:8px;">(翌)</span><td><%= l(one.approved_finished_at, format: :time1) %></td>
+                              <td><span style="color: red; font-size:8px;">(翌)</span><%= l(one.approved_finished_at, format: :time1) %></td>
                             <% else %>
                               <td><%= l(one.approved_finished_at, format: :time1) %></td>
                             <% end %>  

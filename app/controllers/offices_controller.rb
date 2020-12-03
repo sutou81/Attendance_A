@@ -1,6 +1,6 @@
 class OfficesController < ApplicationController
   before_action :set_office, only: [:edit, :update, :destroy]
-  before_action :admin_user
+  before_action :admin_user_office
 
   def index
     @office = Office.new
@@ -56,5 +56,14 @@ class OfficesController < ApplicationController
   # paramsハッシュからユーザーを取得します。
   def set_office
     @office = Office.find(params[:id])
+  end
+
+  def admin_user_office
+    unless current_user.admin?
+      if current_page?(offices_path)
+        flash[:danger] = "閲覧権限がありません。"
+      end
+      redirect_to root_url
+    end
   end
 end

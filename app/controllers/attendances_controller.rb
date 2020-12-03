@@ -29,6 +29,12 @@ class AttendancesController < ApplicationController
   
   def edit_one_month
     @superior = User.where(superior: true)
+    if @user.superior?
+      @superior = @superior.where.not(id:@user)
+    end
+    @approved_sceduled_end_time = Attendance.where(worked_on: @first_day..@last_day)
+    @approved_sceduled_end_time = @approved_sceduled_end_time.where.not(approved_sceduled_end_time: nil)
+    
   end
   
   # 繰り返し処理の中では、まずはじめにidを使って更新対象となるオブジェクトを変数に代入します。
@@ -108,6 +114,9 @@ class AttendancesController < ApplicationController
     @attendance = Attendance.find(params[:id])
     @user = User.find(@attendance.user_id)
     @superior = User.where(superior: true)
+    if @user.superior?
+      @superior = @superior.where.not(id:@user)
+    end
     
     
   end
@@ -448,7 +457,6 @@ class AttendancesController < ApplicationController
       @status = {"なし": 1, "申請中":2, "承認":3, "否認":4}
       attendance = Attendance.where(instructor_confirmation: @user.id)
       attendance = attendance.where("overtime_application_status LIKE ?", "%申請中%")
-      debugger
       @superior = params[:id]
       if attendance.blank? && @attendance2.blank?
         @users = User.find(params[:user_id]) # 勤怠を編集した人のUserモデルのデータが入ってる

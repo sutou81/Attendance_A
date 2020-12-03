@@ -20,7 +20,7 @@ class User < ApplicationRecord
   validates :affiliation, length: {in: 2..30}, allow_blank: true
   validates :basic_time, presence: true
   validates :work_time, presence: true
-  validates :employee_number, uniqueness: true
+  validates :employee_number, uniqueness: true, allow_nil: true
   VALID_UID = /\A[a-z0-9]+\z/i
   validates :uid, format: { with: VALID_UID, message: ' 半角英数文字のみ入力可能です'  }, allow_blank: true
   # allow_nil:これでは新規作成の時もパスワードのバリデーションがスルーされてしまうのでは？

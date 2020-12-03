@@ -35,6 +35,9 @@ class UsersController < ApplicationController
     @attendance2 = @attendance2.where("overtime_application_status LIKE ?", "%申請中%")
     @attendance2.order(:user_id, :worked_on)
     @superior = User.where(superior: true)
+    if @user.superior?
+      @superior = @superior.where.not(id:@user)
+    end
     if params[:id].present?
       @specific = params[:attendance_id]
     end
@@ -122,7 +125,8 @@ class UsersController < ApplicationController
   end
   
   def destroy
-    @user.delete
+    debugger
+    @user.destroy
     flash[:success] = "#{@user.name}のデータを削除しました"
     redirect_to users_url
   end

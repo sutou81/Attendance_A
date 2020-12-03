@@ -1,6 +1,10 @@
 class ApplicationController < ActionController::Base
   require 'rounding'
   protect_from_forgery with: :exception
+  # paramsハッシュからユーザーを取得します。
+  def set_user
+    @user = User.find(params[:id])
+  end
   include SessionsHelper
   include ActionView::Helpers::UrlHelper
   # %w{日 月 火 水 木 金 土}はRubyのリテラル表記と呼ばれるものです。
@@ -37,4 +41,6 @@ class ApplicationController < ActionController::Base
     redirect_to root_url
    
   end
+
+   
 end

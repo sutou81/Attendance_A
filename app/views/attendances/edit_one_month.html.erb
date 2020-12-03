@@ -1,84 +1,87 @@
 <% provide(:title, @user.name) %>
 <div class="container">
-  <%= form_with(model: @user, url: attendances_update_one_month_user_path(date: @first_day), local: true, method: :patch) do |f| %>
+  
     <div>
       <h1>勤怠編集画面</h1>
-      <table class="table table-bordered table-condensed table-hover" id="table-attendances">
-        <thead>
-          <tr>
-            <th>日付</th>
-            <th>曜日</th>
-            <th>出勤時間</th>
-            <th>退勤時間</th>
-            <th>翌日</th>
-            <th>在社時間</th>
-            <th>備考</th>
-            <th>指示者確認㊞ </th>
-          </tr>
-        </thead>
-        <tbodY>
-          <% @attendances.zip(@count) do |day, cou| %>
-            <%= f.fields_for "attendances[]", day do |attendance| %>
-              <tr>
-                <td><%= l(day.worked_on, format: :short) %></td>
-                <% if day.worked_on.wday == 6
-                    x = "sat"
-                  elsif day.worked_on.wday == 0
-                    x = "sun"
-                  end %>
-                <td class="<%= x %>"><%= $days_of_the_week[day.worked_on.wday] %></td>
-              <% if (Date.current < day.worked_on) %>
-                <td><%= attendance.time_field :started_at, readonly: true, class:"form-control", id: "sample#{cou}" %></td>
-                <td><%= attendance.time_field :finished_at, readonly: true, class:"form-control", id: "example#{cou}",:onChange=>"javascript: func1();" %></td>
-              <% elsif (Date.current == day.worked_on) &&  day.finished_at.nil? %>
-                <% day.started_at = nil %>
-                <td><%= attendance.time_field :started_at, class:"form-control", id: "sample#{cou}" %></td>
-                <td><%= attendance.time_field :finished_at, class:"form-control", id: "example#{cou}",:onChange=>"javascript: func1();" %></td>
+      <% if @approved_sceduled_end_time.present? %>
+        <button class="btn btn-danger"
+          data-toggle="collapse"
+          data-target="#example-1"
+          aria-expand="false"
+          aria-controls="example-1">※ 注意事項</button>
+        <div class="collapse" id="example-1">
+          <div class="card card-body border">
+            <span>&nbsp;&nbsp;</span>下記の残業承認事項があります。<span style="color:red;, font-weight:bold;">注意して勤怠編集申請</span>してください。<br>
+            <% @approved_sceduled_end_time.each do |s| %>
+              <span>&nbsp;&nbsp;&nbsp;&nbsp;</span><%= l(s.worked_on, format: :short) %>&nbsp;&nbsp;
+              <% if s.approved_sceduled_end_time == s.sceduled_end_time && s.next_day == "1" %>
+                <span style="color: red; font-size:8px;">(翌)</span><%= l(s.approved_sceduled_end_time, format: :time) %>
               <% else %>
-                <% if day.started_at.present? && day.finished_at.nil? %>
+                <%= l(s.approved_sceduled_end_time, format: :time) %>
+              <% end %><br>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      <%= form_with(model: @user, url: attendances_update_one_month_user_path(date: @first_day), local: true, method: :patch) do |f| %>
+        <table class="table table-bordered table-condensed table-hover" id="table-attendances">
+          <thead>
+            <tr>
+              <th>日付</th>
+              <th>曜日</th>
+              <th>出勤時間</th>
+              <th>退勤時間</th>
+              <th>翌日</th>
+              <th>在社時間</th>
+              <th>備考</th>
+              <th>指示者確認㊞ </th>
+            </tr>
+          </thead>
+          <tbodY>
+            <% @attendances.zip(@count) do |day, cou| %>
+              <%= f.fields_for "attendances[]", day do |attendance| %>
+                <tr>
+                  <td><%= l(day.worked_on, format: :short) %></td>
+                  <% if day.worked_on.wday == 6
+                      x = "sat"
+                    elsif day.worked_on.wday == 0
+                      x = "sun"
+                    end %>
+                  <td class="<%= x %>"><%= $days_of_the_week[day.worked_on.wday] %></td>
+                <% if (Date.current < day.worked_on) %>
+                  <td><%= attendance.time_field :started_at, readonly: true, class:"form-control", id: "sample#{cou}" %></td>
+                  <td><%= attendance.time_field :finished_at, readonly: true, class:"form-control", id: "example#{cou}",:onChange=>"javascript: func1();" %></td>
+                <% elsif (Date.current == day.worked_on) &&  day.finished_at.nil? %>
                   <% day.started_at = nil %>
-                <% end %>
-                <td><%= attendance.time_field :started_at, class:"form-control", id: "sample#{cou}" %></td>
-                <td><%= attendance.time_field :finished_at, class:"form-control", id: "example#{cou}"%></td>
-              <% end %> 
-              <td><%= attendance.check_box :onday_check_box, id: "onday_check_box#{cou}",:onChange=>"javascript: func3();" %></td>
-              <td>
-                <% if day.started_at.present? && day.finished_at.present? %>
-                　
-                  <span id="result<%= cou %>"><%= working_times(day.started_at, day.finished_at) %></span>
+                  <td><%= attendance.time_field :started_at, class:"form-control", id: "sample#{cou}" %></td>
+                  <td><%= attendance.time_field :finished_at, class:"form-control", id: "example#{cou}",:onChange=>"javascript: func1();" %></td>
                 <% else %>
-                  <script>func2()</script>
-                  <span id="result<%= cou %>"></span>
-                <% end %>
-                <script language="javascript" type="text/javascript">
-                    function func1() {
-                      var from_time = document.getElementById("sample<%= cou %>").value;
-                      var from_time1 = "00:00";
-                      var to_time = document.getElementById("example<%= cou %>").value;
-                      if(!from_time){
-                        var c = 0;
-                        var d = (Number(to_time)-Number(c)).toFixed(2);
-                        alert('出勤時間が空白です。もう一度、出勤時間→終了時間の手順で入力し直してください');
-                        return false;
-                      };
-                      const onday_check_box = document.getElementById("onday_check_box<%= cou %>");
-                      var [from_hour, from_minute] = from_time.split(':');
-                      var [to_hour, to_minute] = to_time.split(':');
-                      var [from_hour1, from_minute1] = from_time1.split(':');
-                      if(onday_check_box.checked){
-                        var a = (to_hour - from_hour + (to_minute - from_minute) / 60.0).toFixed(2);
-                        document.getElementById("result<%= cou %>").innerHTML = (Number(a)+Number(24)).toFixed(2);
-                      }else{
-                        document.getElementById("result<%= cou %>").innerHTML = (to_hour - from_hour + (to_minute - from_minute) / 60.0).toFixed(2);
-                      }
-                    }
-                      document.getElementById("example<%= cou %>").onchange = func1;
-
-                    function func3() {
-                      var from_time = document.getElementById("sample<%= cou %>").value;
-                      var from_time1 = "00:00";
-                      var to_time = document.getElementById("example<%= cou %>").value;
-                      if (from_time && to_time){
+                  <% if day.started_at.present? && day.finished_at.nil? %>
+                    <% day.started_at = nil %>
+                  <% end %>
+                  <td><%= attendance.time_field :started_at, class:"form-control", id: "sample#{cou}" %></td>
+                  <td><%= attendance.time_field :finished_at, class:"form-control", id: "example#{cou}"%></td>
+                <% end %> 
+                <td><%= attendance.check_box :onday_check_box, id: "onday_check_box#{cou}",:onChange=>"javascript: func3();" %></td>
+                <td>
+                  <% if day.started_at.present? && day.finished_at.present? %>
+                  　
+                    <span id="result<%= cou %>"><%= working_times(day.started_at, day.finished_at) %></span>
+                  <% else %>
+                    <script>func2()</script>
+                    <span id="result<%= cou %>"></span>
+                  <% end %>
+                  <script language="javascript" type="text/javascript">
+                      function func1() {
+                        var from_time = document.getElementById("sample<%= cou %>").value;
+                        var from_time1 = "00:00";
+                        var to_time = document.getElementById("example<%= cou %>").value;
+                        if(!from_time){
+                          var c = 0;
+                          var d = (Number(to_time)-Number(c)).toFixed(2);
+                          alert('出勤時間が空白です。もう一度、出勤時間→終了時間の手順で入力し直してください');
+                          return false;
+                        };
                         const onday_check_box = document.getElementById("onday_check_box<%= cou %>");
                         var [from_hour, from_minute] = from_time.split(':');
                         var [to_hour, to_minute] = to_time.split(':');
@@ -90,27 +93,46 @@
                           document.getElementById("result<%= cou %>").innerHTML = (to_hour - from_hour + (to_minute - from_minute) / 60.0).toFixed(2);
                         }
                       }
-                    }
-                    document.getElementById("onday_check_box<%= cou %>").onchange = func3;
-                </script>
-    
-    
-                </td>
-                <td><%= attendance.text_field :note, class:"form-control" %></td>
-                <td><%= attendance.collection_select :oneday_instructor_confirmation, @superior, :id, :name,  {prompt: "選択して下さい"}, {class: "form-control"} %></td>
-              </tr>
-            <% end %>
-          <% end %>  
-        </tbody>
-      </table>
-    </div>
-    
-    <div class="center">
-      <%= link_to "キャンセル", user_path(date:@first_day), class:"btn btn-lg btn-default" %>
-      <%= f.submit "編集を保存する", class: "btn btn-lg btn-primary" %>
+                        document.getElementById("example<%= cou %>").onchange = func1;
+
+                      function func3() {
+                        var from_time = document.getElementById("sample<%= cou %>").value;
+                        var from_time1 = "00:00";
+                        var to_time = document.getElementById("example<%= cou %>").value;
+                        if (from_time && to_time){
+                          const onday_check_box = document.getElementById("onday_check_box<%= cou %>");
+                          var [from_hour, from_minute] = from_time.split(':');
+                          var [to_hour, to_minute] = to_time.split(':');
+                          var [from_hour1, from_minute1] = from_time1.split(':');
+                          if(onday_check_box.checked){
+                            var a = (to_hour - from_hour + (to_minute - from_minute) / 60.0).toFixed(2);
+                            document.getElementById("result<%= cou %>").innerHTML = (Number(a)+Number(24)).toFixed(2);
+                          }else{
+                            document.getElementById("result<%= cou %>").innerHTML = (to_hour - from_hour + (to_minute - from_minute) / 60.0).toFixed(2);
+                          }
+                        }
+                      }
+                      document.getElementById("onday_check_box<%= cou %>").onchange = func3;
+                  </script>
       
+      
+                  </td>
+                  <td><%= attendance.text_field :note, class:"form-control" %></td>
+                  <td><%= attendance.collection_select :oneday_instructor_confirmation, @superior, :id, :name,  {prompt: "選択して下さい"}, {class: "form-control"} %></td>
+                </tr>
+              <% end %>
+            <% end %>  
+          </tbody>
+        </table>
+        <div class="center">
+          <%= link_to "キャンセル", user_path(date:@first_day), class:"btn btn-lg btn-default" %>
+          <%= f.submit "編集を保存する", class: "btn btn-lg btn-primary" %>
+          
+        </div>
+      <% end %>
     </div>
-  <% end %>
+    
+    
 </div>
 <script>
 setTimeout( function(){

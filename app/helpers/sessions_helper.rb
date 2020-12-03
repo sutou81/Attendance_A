@@ -115,7 +115,7 @@ module SessionsHelper
   # current_page?(users_path)→以下のように、current_page?メソッドを用いることによって、表示中のページのパスを判定できる
   def admin_user
     unless current_user.admin?
-      if current_page?(users_path) || current_page?(employees_at_work_user_path)
+      if current_page?(users_path) || current_page?(employees_at_work_user_path(set_user))
         flash[:danger] = "閲覧権限がありません。"
       end
       redirect_to root_url
